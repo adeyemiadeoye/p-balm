@@ -23,9 +23,13 @@
         :alt: Twitter
         :target: https://twitter.com/allema
 
-.. image:: https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold
-    :alt: Project generated with PyScaffold
-    :target: https://pyscaffold.org/
+    .. image:: https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold
+        :alt: Project generated with PyScaffold
+        :target: https://pyscaffold.org/
+
+.. image:: https://readthedocs.org/projects/allema/badge/?version=latest
+    :alt: ReadTheDocs
+    :target: https://allema.readthedocs.io/en/stable/
 
 |
 
@@ -34,16 +38,14 @@ allema
 ======
 
 
-    Add a short description here!
+    Augmented Lagrangian Method for Constrained Optimization
 
 
-A longer description of your project goes here...
+Augmented Lagrangian Method for Constrained Optimization....
 
 
-.. _pyscaffold-notes:
+    .. _pyscaffold-notes:
 
 Note
 ====
 
-This project has been set up using PyScaffold 4.6. For details and usage
-information on PyScaffold see https://pyscaffold.org/.
