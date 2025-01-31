@@ -93,7 +93,7 @@ class Solution:
             eq_con_x = self.problem.eq_con(x_new) if self.problem.eq_con else np.array([])
             ineq_con_x = self.problem.ineq_con(x_new) if self.problem.ineq_con else np.array([])
             lbda = lbda + rho*eq_con_x if self.problem.eq_con else lbda
-            mu_new = np.maximum(0, mu + ineq_con_x) if self.problem.ineq_con else mu
+            mu_new = np.maximum(0, mu + nu*ineq_con_x) if self.problem.ineq_con else mu
 
             nrm_h = np.linalg.norm(eq_con_x, np.inf) if self.problem.eq_con else 0
             if self.problem.eq_con and nrm_h > self.beta*np.linalg.norm(self.problem.eq_con(x), np.inf):
