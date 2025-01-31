@@ -3,6 +3,9 @@ import numpy as np
 import jax.numpy as jnp
 import jax.random as random
 
+# problem as seen in:
+# Kiessling, David, Sven Leyffer, and Charlie Vanaret. "A Unified Funnel Restoration SQP Algorithm." arXiv preprint arXiv:2409.09208 (2024).
+
 __author__ = "Adeyemi Damilare Adeoye"
 __copyright__ = "Adeyemi Damilare Adeoye"
 __license__ = "MIT"
@@ -19,9 +22,9 @@ def h(x):
 
 from scipy.optimize import minimize
 def constraint_1(x):
-    return -1 + 10000 * x[0] * x[1]  # First equality constraint
+    return -1 + 10000 * x[0] * x[1]
 def constraint_2(x):
-    return -1.0001 + np.exp(-x[0]) + np.exp(-x[1])  # Second equality constraint
+    return -1.0001 + np.exp(-x[0]) + np.exp(-x[1])
 constraints = [
     {'type': 'eq', 'fun': constraint_1},
     {'type': 'eq', 'fun': constraint_2}
