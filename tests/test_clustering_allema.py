@@ -21,6 +21,7 @@ __license__ = "MIT"
 
 np.random.seed(1234)
 
+## NOTE: create a ./tests/saved_models/ directory if not already there
 MODEL_FILE = ["./tests/saved_models/fashion_mnist_model.pkl", "./saved_models/fashion_mnist_model.pkl"]
 
 for model_file in MODEL_FILE:
