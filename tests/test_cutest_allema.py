@@ -71,9 +71,9 @@ for probname in cutest_problems:
     mu0 = np.random.randn(m_ineq)
     rho = 1
     nu = 1
-    tol = 2e-4
+    tol = 1e-4
     max_iter = 1000
-    sol = alm.solve(problem, x0, lbda, mu0, rho, nu, tol=tol, max_iter=max_iter, start_feas=True, inner_solver="BFGS")
+    sol = alm.solve(problem, x0, lbda, mu0, rho, nu, tol=tol, max_iter=max_iter, start_feas=True, inner_solver="L-BFGS-B")
     
     results.append((probname, nvar, m_eq, m_ineq, sol.solve_status))
 

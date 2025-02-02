@@ -37,7 +37,7 @@ print("Optimal x:", result.x)
 x0 = jnp.array([0.5, 0.1])
 lbda = jnp.array([1, 1])
 mu0 = jnp.array([])
-rho = 1
+rho = 10
 nu = 1
 tol = 1e-6
 max_iter = 100
@@ -48,7 +48,6 @@ problem = alm.Problem(
     ineq_con=None
 )
 
-lbfgs_options = {'maxls': 20, 'gtol': tol, 'eps': 1.e-8, 'ftol': tol, 'maxfun': max_iter, 'maxcor': 10}
-sol = alm.solve(problem, x0, lbda, mu0, rho, nu, tol=tol, max_iter=max_iter, lbfgs_options=lbfgs_options, start_feas=True, inner_solver="BFGS")
+sol = alm.solve(problem, x0, lbda, mu0, rho, nu, tol=tol, max_iter=max_iter, start_feas=False, inner_solver="BFGS")
 
 print(sol.x)

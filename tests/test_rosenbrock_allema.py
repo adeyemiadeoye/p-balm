@@ -31,8 +31,6 @@ problem = alm.Problem(
     ineq_con=None
 )
 
-sol = alm.solve(problem, x0, lbda, mu0, rho, nu, tol=tol, max_iter=max_iter, start_feas=False, inner_solver="BFGS")
+sol = alm.solve(problem, x0, lbda, mu0, rho, nu, tol=tol, max_iter=max_iter, start_feas=False, inner_solver="L-BFGS-B")
 
 print(jnp.sum(sol.x))
-
-

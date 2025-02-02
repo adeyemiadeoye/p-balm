@@ -30,6 +30,7 @@ class Solution:
         self.x = x0
         self.start_feas = start_feas
         self.inner_solver = inner_solver
+        self.grad_norm = []
         self.kkt_res = []
         self.obj_hist = []
         self.rho_hist = []
@@ -80,6 +81,7 @@ class Solution:
                 stopping_terms = [np.linalg.norm(L0_grad, np.inf), nrm_h, nrm_E]
                 eps_kkt_res = np.max(stopping_terms[1:])
                 self.kkt_res.append(eps_kkt_res)
+                self.grad_norm.append(stopping_terms[0])
                 self.obj_hist.append(self.problem.obj(x))
                 self.rho_hist.append(rho)
                 self.nu_hist.append(nu)
@@ -187,20 +189,29 @@ class Solution:
 
         return self.problem.obj(x) + eq_term + ineq_term
 
-    def _minimize_L_aug(self, x, lbda, mu, rho, nu):
+    def _minimize_L_aug(self, x0, lbda, mu, rho, nu):
         def L_aug(x):
             return self._get_L_aug(x, lbda, mu, rho, nu, aug=True)
         def dL_aug(x):
             return self._get_L_aug_grad(x, lbda, mu, rho, nu, aug=True)
-        
         if self.inner_solver == "L-BFGS-B":
-            res = minimize(L_aug, x, method=self.inner_solver, jac=dL_aug, options=self.lbfgs_options)
+            res = minimize(L_aug, x0, method=self.inner_solver, jac=dL_aug, options=self.lbfgs_options)
         else:
-            res = minimize(L_aug, x, method=self.inner_solver, jac=dL_aug)
-        x = res.x
-        return x
+            res = minimize(L_aug, x0, method=self.inner_solver, jac=dL_aug)
+        return res.x
+
+class Result:
+    def __init__(self, x, grad_norm, kkt_res, obj_hist, rho_hist, nu_hist, solve_status):
+        self.x = x
+        self.grad_norm = grad_norm
+        self.kkt_res = kkt_res
+        self.obj_hist = obj_hist
+        self.rho_hist = rho_hist
+        self.nu_hist = nu_hist
+        self.solve_status = solve_status
 
 def solve(problem, x0, lbda0, mu0, rho0, nu0, beta=0.5, alpha=1.5, xi1=1.5, xi2=1.5, tol=1e-6, max_iter=1000, start_feas=True, inner_solver="BFGS", lbfgs_options=None, verbosity=1):
     solution = Solution(problem, x0, lbda0, mu0, rho0, nu0, beta=beta, alpha=alpha, xi1=xi1, xi2=xi2, tol=tol, max_iter=max_iter, start_feas=start_feas, inner_solver=inner_solver, lbfgs_options=lbfgs_options, verbosity=verbosity)
     solution.allema()
-    return solution
+    res = Result(solution.x, solution.grad_norm, solution.kkt_res, solution.obj_hist, solution.rho_hist, solution.nu_hist, solution.solve_status)
+    return res

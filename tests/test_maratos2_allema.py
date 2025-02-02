@@ -35,15 +35,6 @@ problem = alm.Problem(
     ineq_con=None
 )
 
-sol = alm.solve(problem, x0, lbda, mu0, rho, nu, tol=tol, max_iter=max_iter, start_feas=False, inner_solver="BFGS")
+sol = alm.solve(problem, x0, lbda, mu0, rho, nu, tol=tol, max_iter=max_iter, start_feas=False, inner_solver="L-BFGS-B")
 
 print(sol.x)
-
-
-# import matplotlib.pyplot as plt
-# plt.plot(sol.obj_hist)
-# plt.xlabel('Iteration')
-# plt.ylabel('Objective Value')
-# plt.title('Objective Value History')
-# plt.grid(True)
-# plt.show()

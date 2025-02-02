@@ -24,7 +24,7 @@ lbda = random.uniform(random.PRNGKey(42), (1,))
 mu0 = jnp.array([])
 rho = 1
 nu = 1
-tol = 1e-6
+tol = 1e-5
 max_iter = 1000
 
 problem = alm.Problem(
@@ -33,4 +33,4 @@ problem = alm.Problem(
     ineq_con=g
 )
 
-sol = alm.solve(problem, x0, lbda, mu0, rho, nu, tol=tol, max_iter=max_iter, start_feas=True, inner_solver="BFGS")
+sol = alm.solve(problem, x0, lbda, mu0, rho, nu, tol=tol, max_iter=max_iter, start_feas=True, inner_solver="L-BFGS-B")
