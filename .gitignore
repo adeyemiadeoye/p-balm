@@ -52,7 +52,6 @@ MANIFEST
 .venv*/
 .conda*/
 .python-version
-tests/test_clustering_allema.py
 tests/saved_models/fashion_mnist_model.pkl
 pycutest_cache_holder/__init__.py
 pycutest_cache_holder/EXPFITC/__init__.py
