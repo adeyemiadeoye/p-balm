@@ -1,6 +1,7 @@
 import sys
 
-from .allema import Problem, solve
+from .pbalm import Problem, solve
+from .utils.prox_utils import SGLPenalty
 
 if sys.version_info[:2] >= (3, 8):
     # TODO: Import directly (no need for conditional) when `python_requires = >= 3.8`
