@@ -211,7 +211,7 @@ def run_basis_pursuit_benchmark(p, n, k):
         plt.plot(rho_hist, np.maximum(tot_inf, 1e-6), label=legend, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none')
     plt.xscale('log')
     plt.yscale('log')
-    plt.xlabel(r'$\rho$')
+    plt.xlabel(r'$\rho_k$')
     plt.ylabel(r'total infeas')
     plt.grid(True, which='major', ls='--')
     # plt.title(rf'$p = {p}, n = {n}$')
@@ -227,7 +227,7 @@ def run_basis_pursuit_benchmark(p, n, k):
         plt.plot(rho_hist, np.maximum(np.abs(f_hist)/np.abs(f_star), 5e-6), label=legend, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none')
     plt.xscale('log')
     plt.yscale('log')
-    # plt.xlabel(r'$\rho$')
+    # plt.xlabel(r'$\rho_k$')
     plt.ylabel(r'$\frac{|f(x^k) - f^\star|}{|f^\star|}$')
     plt.grid(True, which='major', ls='--')
     plt.title(rf'$p = {p}, n = {n}$')
@@ -237,4 +237,4 @@ def run_basis_pursuit_benchmark(p, n, k):
     plt.savefig(fname_rho_fx, format='pdf', bbox_inches='tight')
     plt.close()
 
-run_basis_pursuit_benchmark(100, 256, 10)
+run_basis_pursuit_benchmark(400, 1024, 10)
