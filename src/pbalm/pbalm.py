@@ -171,7 +171,7 @@ class Solution:
         nu_vec = self.nu_vec.copy() if self.nu_vec is not None else None
 
         if self.verbosity > 0:
-            print(f"{'iter':<5} | {'f':<10} | {'p. term':<10} | {'FP res':<10} | {'total infeas':<10} | {'rho':<10} | {'nu':<10} | {'gamma':<10}")
+            print(f"{'iter':<5} | {'f':<10} | {'p. term':<10} | {'total infeas':<10} | {'rho':<10} | {'nu':<10} | {'gamma':<10}")
             print("-" * 90)
 
         prox_term_i = jnp.nan
@@ -233,7 +233,7 @@ class Solution:
                 self.gamma_hist.append(self.gamma_k)
                 self.prox_hist.append(prox_term_i)
                 print(
-                    f"{i:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {prox_grad_res_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
+                    f"{i:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
                 best_f = f_x
                 best_kkt = eps_kkt_res
                 patience_counter = 0
@@ -289,12 +289,11 @@ class Solution:
             if jnp.isnan(self.problem.f(x_new)) or jnp.isinf(self.problem.f(x_new)) or isnanfpres or isnannu or isnanrho or isnangamma:
                 if self.verbosity > 0:
                     print(
-                    f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {prox_grad_res_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
+                    f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
                     print("-" * 90)
                     print("One or more functions returned NaN or Inf. Stopping optimization.")
                     print(f"{'Objective value:':<25} {f_x:.6e}")
                     print(f"{'prox_term_i:':<25} {prox_term_i:.6e}")
-                    print(f"{'FP res:':<25} {prox_grad_res_i:.6e}")
                     print(f"{'eps-KKT residual:':<25} {eps_kkt_res:.6e}")
                     print(f"{'total infeas:':<25} {self.total_infeas[-1]:.6e}")
                     print(f"{'rho:':<25} {jnp.max(rho_vec) if rho_vec is not None else 0:.6e}")
@@ -383,7 +382,7 @@ class Solution:
 
             if self.verbosity > 0 and ((i + 1) % int(20/self.verbosity) == 0 or (i + 1) == self.max_iter):
                 print(
-                    f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {prox_grad_res_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
+                    f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
 
             # patience logic
             current_f = f_x
@@ -413,7 +412,7 @@ class Solution:
             if (eps_kkt_res <= self.tol):
                 if self.verbosity > 0:
                     print(
-                        f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {prox_grad_res_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
+                        f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
                     print("-" * 90)
                     print(f"Convergence achieved after {i + 1} iterations.")
                     print(f"{'Optimal f value found:':<25} {f_x:.6e}")
@@ -431,7 +430,6 @@ class Solution:
                     print("Maximum iterations reached without convergence.")
                     print(f"{'Objective value:':<25} {f_x:.6e}")
                     print(f"{'prox_term_i:':<25} {prox_term_i:.6e}")
-                    print(f"{'FP res:':<25} {prox_grad_res_i:.6e}")
                     print(f"{'eps-KKT residual:':<25} {eps_kkt_res:.6e}")
                     print(f"{'total infeas:':<25} {self.total_infeas[-1]:.6e}")
                     print(f"{'rho:':<25} {jnp.max(rho_vec) if rho_vec is not None else 0:.6e}")
