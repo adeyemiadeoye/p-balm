@@ -57,7 +57,7 @@ def run_basis_pursuit_benchmark(p, n, k):
     def h(x):
         return B_big@(x**2) - b
     def h_grad(x):
-        return B_big
+        return 2*jnp.dot(B_big,x)
     problem = pbalm.Problem(
         f=f,
         h=h,
@@ -193,17 +193,6 @@ def run_basis_pursuit_benchmark(p, n, k):
     plt.savefig(fname, format='pdf', bbox_inches='tight')
     plt.close()
 
-    fig_leg, ax_leg = plt.subplots(figsize=(7, 1), dpi=300)
-    handles = []
-    for idx, legend in enumerate(legends):
-        handle, = ax_leg.plot([], [], marker=markers[idx % len(markers)], markerfacecolor='none')
-        handles.append(handle)
-    ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends))
-    ax_leg.axis('off')
-    fname_leg = f"legend_MM_basis_pursuit_p{p}_n{n}_k{k}.pdf"
-    plt.savefig(fname_leg, format='pdf', bbox_inches='tight')
-    plt.close(fig_leg)
-
 
     ##### PLOT rho_hist #####
     plt.figure(figsize=(7,5), dpi=300)
@@ -237,4 +226,4 @@ def run_basis_pursuit_benchmark(p, n, k):
     plt.savefig(fname_rho_fx, format='pdf', bbox_inches='tight')
     plt.close()
 
-run_basis_pursuit_benchmark(400, 1024, 10)
+run_basis_pursuit_benchmark(100, 256, 10)

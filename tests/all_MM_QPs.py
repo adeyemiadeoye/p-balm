@@ -268,20 +268,18 @@ def compare_alm_algs(prob_name, f_star=None):
     plt.close()
 
 
-    fig_leg, ax_leg = plt.subplots(figsize=(7, 1), dpi=300)
-    handles = []
-    for idx, legend in enumerate(legends):
-        handle, = ax_leg.plot([], [], marker=markers[idx % len(markers)], markerfacecolor='none')
-        handles.append(handle)
-    ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends))
-    ax_leg.axis('off')
-    # plt.tight_layout()
     if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
+        fig_leg, ax_leg = plt.subplots(figsize=(7, 1), dpi=300)
+        handles = []
+        for idx, legend in enumerate(legends):
+            handle, = ax_leg.plot([], [], marker=markers[idx % len(markers)], markerfacecolor='none')
+            handles.append(handle)
+        ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends))
+        ax_leg.axis('off')
+        # plt.tight_layout()
         fname_leg = f"legend_MM_0.pdf"
-    else:
-        fname_leg = f"legend_MM.pdf"
-    plt.savefig(fname_leg, format='pdf', bbox_inches='tight')
-    plt.close(fig_leg)
+        plt.savefig(fname_leg, format='pdf', bbox_inches='tight')
+        plt.close(fig_leg)
 
 
 
