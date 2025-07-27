@@ -68,9 +68,15 @@ def run_basis_pursuit_benchmark(p, n, k):
     x0 = jnp.array(rng.standard_normal(2*n))
     h0 = h(x0)
     lbda0 = jnp.array(rng.standard_normal(h0.shape))
+
+    # tol = 1e-6
+    # max_iter = 150
+
     tol = 1e-4
-    fp_tol = 5e-3
     max_iter = 2000
+
+    fp_tol = 5e-3
+    
     f_star = f(x_star)
     # f_star = solve_gurobi()
     ## for the default setup (p, n, k) and default seed,
@@ -78,6 +84,9 @@ def run_basis_pursuit_benchmark(p, n, k):
     ## but it takes a long time to solve
 
     print(f"f_star: {f_star}")
+    f0 = f(x0)
+    print(f"f0: {f0}")
+    f0_f_star = f0 - f_star
 
     alpha_vals_alm = [3]
     xi_vals_alm = [4]
@@ -88,14 +97,34 @@ def run_basis_pursuit_benchmark(p, n, k):
 
     feas_meas_results = []
     grad_evals_results = []
+    grad_evals_results_0 = []
     legends = []
-    legends_rho = []
+    legends_rho_0 = []
     f_hist_results = []
-    f_hist_rho = []
-    feas_meas_rho = []
     rho_hist_list = []
 
-    markers = ['o', 's', 'D', '^', 'v', 'P', '*', 'X', '<', '>']
+    markers = ['o', 's', 'D', '^', 'v', 'P', '*', 'X', '<', '>', 'p', 'H', 'h', '1', '2', '3', '4']
+    num_lines = max(len(grad_evals_results), len(markers))
+    n_dark2 = plt.cm.Dark2.N
+    n_set1 = plt.cm.Set1.N
+    colors_dark2 = plt.cm.Dark2(np.linspace(0, 1, n_dark2))
+    colors_set1 = plt.cm.Set1(np.linspace(0, 1, n_set1))
+    colors_ext = np.concatenate([colors_dark2, colors_set1], axis=0)
+    if num_lines > len(colors_ext):
+        colors = np.tile(colors_ext, (int(np.ceil(num_lines / len(colors_ext))), 1))[:num_lines]
+    else:
+        colors = colors_ext[:num_lines]
+
+    linestyles = [
+                    #   (0, (1, 5)),
+                    #   (0, (1, 1)),
+                      (5, (10, 3)),
+                      (0, (5, 1)),
+                      (0, (3, 1, 1, 1)),
+                      (0, (3, 1, 1, 1, 1, 1)),
+                      (0, (3, 5, 1, 5, 1, 5)),
+                      '--', '-', '-.', ':']
+    marker_size = 10
 
     # ALM
     for xi_alm in xi_vals_alm:
@@ -107,11 +136,10 @@ def run_basis_pursuit_benchmark(p, n, k):
         f_hist_alm = np.array(sol_alm.f_hist) - f_star
         legends.append(r"\texttt{ALM}-" + str(xi_alm))
         rho_hist_list.append(np.array(sol_alm.rho_hist))
-        legends_rho.append(legends[-1])
-        f_hist_rho.append(f_hist_alm)
-        feas_meas_rho.append(feas_meas_alm)
+        legends_rho_0.append(r"\texttt{ALM}")
         feas_meas_results.append(feas_meas_alm)
         grad_evals_results.append(grad_evals_alm)
+        grad_evals_results_0.append(grad_evals_alm)
         f_hist_results.append(f_hist_alm)
         problem.reset_counters()
 
@@ -126,11 +154,10 @@ def run_basis_pursuit_benchmark(p, n, k):
         f_hist_pbalm = np.array(sol_pbalm.f_hist) - f_star
         legends.append(r"\texttt{P-BALM}-" + str(alpha))
         rho_hist_list.append(np.array(sol_pbalm.rho_hist))
-        legends_rho.append(legends[-1])
-        f_hist_rho.append(f_hist_pbalm)
-        feas_meas_rho.append(feas_meas_pbalm)
+        legends_rho_0.append(r"\texttt{P-BALM}")
         feas_meas_results.append(feas_meas_pbalm)
         grad_evals_results.append(grad_evals_pbalm)
+        grad_evals_results_0.append(grad_evals_pbalm)
         f_hist_results.append(f_hist_pbalm)
         problem.reset_counters()
 
@@ -145,85 +172,206 @@ def run_basis_pursuit_benchmark(p, n, k):
         f_hist_balm = np.array(sol_balm.f_hist) - f_star
         legends.append(r"\texttt{BALM}-" + str(alpha))
         rho_hist_list.append(np.array(sol_balm.rho_hist))
-        legends_rho.append(legends[-1])
-        f_hist_rho.append(f_hist_balm)
-        feas_meas_rho.append(feas_meas_balm)
+        legends_rho_0.append(r"\texttt{BALM}")
         feas_meas_results.append(feas_meas_balm)
         grad_evals_results.append(grad_evals_balm)
+        grad_evals_results_0.append(grad_evals_balm)
         f_hist_results.append(f_hist_balm)
         problem.reset_counters()
 
+    if len(alpha_vals_alm) == 1 and len(xi_vals_alm) == 1:
+        legends = legends_rho_0
+
     setup_matplotlib(24, 24)
     plt.figure(figsize=(7,5), dpi=300)
-    for idx, (grad_evals, tot_inf, legend) in enumerate(zip(grad_evals_results, feas_meas_results, legends)):
-        plt.plot(grad_evals, np.maximum(tot_inf, 1e-6), label=legend, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none')
+    for idx, (grad_evals, tot_inf, legend) in enumerate(zip(grad_evals_results_0, feas_meas_results, legends)):
+        if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
+            label = None
+        else:
+            label = legend
+        plt.plot(grad_evals, np.maximum(tot_inf, 1e-6), label=label,
+                 marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
+                 color=colors[idx % len(colors)],
+                #  linestyle=linestyles[idx % len(linestyles)],
+                linestyle='dashdot',
+                 markersize=marker_size)
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel(r'grad evals')
     plt.ylabel(r'total infeas')
     plt.grid(True, which='major', ls='--')
-    plt.legend(fontsize=18, loc='upper right')
+    if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
+        plt.legend(fontsize=18, loc='upper right')
     ax = plt.gca()
     formatter = mticker.ScalarFormatter(useMathText=True)
     formatter.set_powerlimits((0, 0))
     ax.xaxis.set_major_formatter(formatter)
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
     plt.tight_layout()
-    fname = f"alm_algs_basis_pursuit_p{p}_n{n}_k{k}.pdf"
+    if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
+        fname = f"alm_algs_basis_pursuit_p{p}_n{n}_k{k}.pdf"
+    else:
+        fname = f"alm_algs_basis_pursuit_p{p}_n{n}_k{k}_multi.pdf"
     plt.savefig(fname, format='pdf', bbox_inches='tight')
     plt.close()
 
     plt.figure(figsize=(7,5), dpi=300)
     for idx, (grad_evals, fx_minus_fxstar, legend) in enumerate(zip(grad_evals_results, f_hist_results, legends)):
-        plt.plot(grad_evals, np.maximum(np.abs(fx_minus_fxstar)/np.abs(f_star), 5e-6), label=legend, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none')
+        if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
+            label = None
+        else:
+            label = legend
+        plt.plot(grad_evals, np.maximum(np.abs(fx_minus_fxstar)/np.abs(f0_f_star), 1e-8),
+                 label=label, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
+                 color=colors[idx % len(colors)],
+                #  linestyle=linestyles[idx % len(linestyles)],
+                linestyle='dashdot',
+                 markersize=marker_size)
     plt.xscale('log')
     plt.yscale('log')
-    # plt.xlabel(r'grad evals')
-    plt.ylabel(r'$\frac{|f(x^k) - f^\star|}{|f^\star|}$')
+    if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
+        plt.xlabel(r'grad evals')
+    plt.ylabel(r'$\frac{|f(x^k) - f^\star|}{|f(x^0) - f^\star|}$')
     plt.grid(True, which='major', ls='--')
-    plt.title(rf'$p = {p}, n = {n}$')
-    plt.legend(fontsize=18, loc='upper right')
+    if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
+        plt.legend(fontsize=18, loc='upper right')
+        plt.title(rf'$p = {p}, n = {n}$')
     ax = plt.gca()
     formatter = mticker.ScalarFormatter(useMathText=True)
     formatter.set_powerlimits((0, 0))
     ax.xaxis.set_major_formatter(formatter)
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
     plt.tight_layout()
-    fname = f"alm_algs_fx_minus_fxstar_basis_pursuit_p{p}_n{n}_k{k}.pdf"
+    if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
+        fname = f"alm_algs_fx_minus_fxstar_basis_pursuit_p{p}_n{n}_k{k}.pdf"
+    else:
+        fname = f"alm_algs_fx_minus_fxstar_basis_pursuit_p{p}_n{n}_k{k}_multi.pdf"
     plt.savefig(fname, format='pdf', bbox_inches='tight')
     plt.close()
 
+    if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
+        fig_leg, ax_leg = plt.subplots(figsize=(7, 1), dpi=300)
+        handles = []
+        for idx, legend in enumerate(legends):
+            handle, = ax_leg.plot([], [], marker=markers[idx % len(markers)], markerfacecolor='none',
+                                  color=colors[idx % len(colors)],
+                                #   linestyle=linestyles[idx % len(linestyles)],
+                                linestyle='dashdot',
+                                  markersize=marker_size
+                                  )
+            handles.append(handle)
+        ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends)//2)
+        ax_leg.axis('off')
+        # plt.tight_layout()
+        fname_leg = f"legend_pb_0.pdf"
+        plt.savefig(fname_leg, format='pdf', bbox_inches='tight')
+        plt.close(fig_leg)
+
 
     ##### PLOT rho_hist #####
-    plt.figure(figsize=(7,5), dpi=300)
-    for idx, (rho_hist, tot_inf, legend) in enumerate(zip(rho_hist_list, feas_meas_rho, legends_rho)):
-        plt.plot(rho_hist, np.maximum(tot_inf, 1e-6), label=legend, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlabel(r'$\rho_k$')
-    plt.ylabel(r'total infeas')
-    plt.grid(True, which='major', ls='--')
-    # plt.title(rf'$p = {p}, n = {n}$')
-    plt.legend(fontsize=18, loc='upper right')
-    plt.tight_layout()
-    fname_rho = f"alm_algs_rho_hist_basis_pursuit_p{p}_n{n}_k{k}.pdf"
-    plt.savefig(fname_rho, format='pdf', bbox_inches='tight')
-    plt.close()
-
-
-    plt.figure(figsize=(7,5), dpi=300)
-    for idx, (rho_hist, f_hist, legend) in enumerate(zip(rho_hist_list, f_hist_rho, legends_rho)):
-        plt.plot(rho_hist, np.maximum(np.abs(f_hist)/np.abs(f_star), 5e-6), label=legend, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none')
-    plt.xscale('log')
-    plt.yscale('log')
+    # plt.figure(figsize=(7,5), dpi=300)
+    # for idx, (rho_hist, tot_inf, legend) in enumerate(zip(rho_hist_list, feas_meas_results, legends)):
+    #     plt.plot(rho_hist, np.maximum(tot_inf, 1e-8), label=legend,
+    #              marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
+    #              color=colors[idx % len(colors)],
+    #             #  linestyle=linestyles[idx % len(linestyles)],
+    #             linestyle='dashdot',
+    #              markersize=marker_size)
+    # plt.xscale('log')
+    # plt.yscale('log')
     # plt.xlabel(r'$\rho_k$')
-    plt.ylabel(r'$\frac{|f(x^k) - f^\star|}{|f^\star|}$')
-    plt.grid(True, which='major', ls='--')
-    plt.title(rf'$p = {p}, n = {n}$')
-    plt.legend(fontsize=18, loc='upper right')
-    plt.tight_layout()
-    fname_rho_fx = f"alm_algs_rho_hist_fx_minus_fxstar_basis_pursuit_p{p}_n{n}_k{k}.pdf"
-    plt.savefig(fname_rho_fx, format='pdf', bbox_inches='tight')
-    plt.close()
+    # plt.ylabel(r'total infeas')
+    # plt.grid(True, which='major', ls='--')
+    # # plt.title(rf'$p = {p}, n = {n}$')
+    # plt.legend(fontsize=18, loc='upper right')
+    # plt.tight_layout()
+    # fname_rho = f"alm_algs_rho_hist_basis_pursuit_p{p}_n{n}_k{k}.pdf"
+    # plt.savefig(fname_rho, format='pdf', bbox_inches='tight')
+    # plt.close()
 
-run_basis_pursuit_benchmark(100, 256, 10)
+
+    # plt.figure(figsize=(7,5), dpi=300)
+    # for idx, (rho_hist, fx_minus_fxstar, legend) in enumerate(zip(rho_hist_list, f_hist_results, legends)):
+    #     plt.plot(rho_hist, np.maximum(np.abs(fx_minus_fxstar)/np.abs(f0_f_star), 5e-7),
+    #              label=legend, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
+    #              color=colors[idx % len(colors)],
+    #             #  linestyle=linestyles[idx % len(linestyles)],
+    #             linestyle='dashdot',
+    #              markersize=marker_size)
+    # plt.xscale('log')
+    # plt.yscale('log')
+    # # plt.xlabel(r'$\rho_k$')
+    # plt.ylabel(r'$\frac{|f(x^k) - f^\star|}{|f(x^0) - f^\star|}$')
+    # plt.grid(True, which='major', ls='--')
+    # plt.title(rf'$p = {p}, n = {n}$')
+    # plt.legend(fontsize=18, loc='upper right')
+    # plt.tight_layout()
+    # fname_rho_fx = f"alm_algs_rho_hist_fx_minus_fxstar_basis_pursuit_p{p}_n{n}_k{k}.pdf"
+    # plt.savefig(fname_rho_fx, format='pdf', bbox_inches='tight')
+    # plt.close()
+
+
+
+
+    if tol < 1e-4: # for illustration purposes
+        colors = ['dimgray', 'red', 'black', 'darkred', 'darkgoldenrod', 'royalblue', 'rebeccapurple', 'saddlebrown', 'darkslategray', 'darkorange', 'steelblue', 'lightcoral']
+        plt.figure(figsize=(7,5), dpi=300)
+        # sel = [1,4,5]
+        for idx, (fx_minus_fxstar, rho_hist, legend) in enumerate(zip(f_hist_results, rho_hist_list, legends_rho_0)):
+            plt.plot(np.maximum(np.abs(fx_minus_fxstar)/np.abs(f0_f_star), 1e-9), rho_hist, label=legend,
+                     marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
+                    color=colors[idx % len(colors)],
+                    linestyle=linestyles[idx % len(linestyles)],
+                    markersize=marker_size,
+                     )
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.gca().invert_xaxis()
+        plt.xlabel(r'$|f(x^k) - f^\star|/|f(x^0) - f^\star|$')
+        # plt.ylabel(r'$\rho_k$')
+        plt.grid(True, which='major', ls='--')
+        plt.legend(fontsize=18, loc='upper left')
+        plt.tight_layout()
+        fname = f"rho_fhist_basis_pursuit_p{p}_n{n}_k{k}.pdf"
+        plt.savefig(fname, format='pdf', bbox_inches='tight')
+        plt.close()
+
+        plt.figure(figsize=(7,5), dpi=300)
+        for idx, (rho_hist, legend) in enumerate(zip(rho_hist_list, legends_rho_0)):
+            plt.plot(rho_hist, label=legend, marker=markers[idx % len(markers)],
+                     markevery=0.1, markerfacecolor='none',
+                    color=colors[idx % len(colors)],
+                    linestyle=linestyles[idx % len(linestyles)],
+                    markersize=marker_size,
+                     )
+        plt.yscale('log')
+        plt.xlabel(r'n. iterations')
+        plt.ylabel(r'$\rho_k$')
+        plt.grid(True, which='major', ls='--')
+        plt.legend(fontsize=18, loc='upper right')
+        plt.tight_layout()
+        fname = f"rho_iter_basis_pursuit_p{p}_n{n}_k{k}.pdf"
+        plt.savefig(fname, format='pdf', bbox_inches='tight')
+        plt.close()
+
+        plt.figure(figsize=(7,5), dpi=300)
+        for idx, (tot_inf, rho_hist, legend) in enumerate(zip(feas_meas_results, rho_hist_list, legends_rho_0)):
+            plt.plot(tot_inf[1:], rho_hist[1:], label=legend,
+                     marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
+                    color=colors[idx % len(colors)],
+                    linestyle=linestyles[idx % len(linestyles)],
+                    markersize=marker_size,
+                     )
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.gca().invert_xaxis()
+        plt.xlabel(r'total infeas')
+        # plt.ylabel(r'$\rho_k$')
+        plt.grid(True, which='major', ls='--')
+        plt.legend(fontsize=18, loc='upper left')
+        plt.tight_layout()
+        fname = f"rho_totinf_basis_pursuit_p{p}_n{n}_k{k}.pdf"
+        plt.savefig(fname, format='pdf', bbox_inches='tight')
+        plt.close()
+
+run_basis_pursuit_benchmark(400, 1024, 10)

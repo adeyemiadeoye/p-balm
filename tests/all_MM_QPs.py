@@ -71,9 +71,15 @@ def compare_alm_algs(prob_name, f_star=None):
     x0 = jnp.array(rng.standard_normal(n))
     g0 = g(x0)
     mu0 = jnp.array(rng.standard_normal(g0.shape))
+
     tol = 1e-5
-    fp_tol = 5e-3
     max_iter = 2000
+
+    # tol = 1e-16
+    # max_iter = 50
+
+
+    fp_tol = 5e-3
 
     cond_Q = np.linalg.cond(np.array(Q))
     
@@ -101,12 +107,18 @@ def compare_alm_algs(prob_name, f_star=None):
 
     print(f"f_star: {f_star}")
 
+    f0 = f(x0)
+    print(f"f0: {f0}")
+    f0_f_star = f0 - f_star
+
     #################### MAIN ALGORITHM COMPARISON ####################
 
     ### this is used with pbalm_org
     if prob_name in ["GENHS28", "DUALC1"]:
-        alpha_vals_alm = [6, 9, 12]
-        xi_vals_alm = [4, 10]
+        alpha_vals_alm = [4, 6, 9, 12]
+        xi_vals_alm = [2, 4, 7, 10]
+        # alpha_vals_alm = [12]
+        # xi_vals_alm = [10]
     else:
         alpha_vals_alm = [12]
         xi_vals_alm = [10]
@@ -131,14 +143,40 @@ def compare_alm_algs(prob_name, f_star=None):
 
     feas_meas_results = []
     grad_evals_results = []
+    grad_evals_nu = []
     legends = []
     legends_nu = []
+    legends_nu_0 = []
+    legends_nu_1 = []
     f_hist_results = []
     f_hist_nu = []
     feas_meas_nu = []
     nu_hist_list = []
 
-    markers = ['o', 's', 'D', '^', 'v', 'P', '*', 'X', '<', '>']
+    markers = ['o', 's', 'D', '^', 'v', 'P', '*', 'X', '<', '>', 'p', 'H', 'h', '1', '2', '3', '4']
+    num_lines = max(len(grad_evals_results), len(markers))
+    n_dark2 = plt.cm.Dark2.N
+    n_set1 = plt.cm.Set1.N
+    colors_dark2 = plt.cm.Dark2(np.linspace(0, 1, n_dark2))
+    colors_set1 = plt.cm.Set1(np.linspace(0, 1, n_set1))
+    colors_ext = np.concatenate([colors_dark2, colors_set1], axis=0)
+    if num_lines > len(colors_ext):
+        colors = np.tile(colors_ext, (int(np.ceil(num_lines / len(colors_ext))), 1))[:num_lines]
+    else:
+        colors = colors_ext[:num_lines]
+
+    # colors = ['dimgray', 'red', 'black', 'darkred', 'darkgoldenrod', 'royalblue', 'rebeccapurple', 'saddlebrown', 'darkslategray', 'darkorange', 'steelblue', 'lightcoral']
+
+    linestyles = [
+                    #   (0, (1, 5)),
+                    #   (0, (1, 1)),
+                      (5, (10, 3)),
+                      (0, (5, 1)),
+                      (0, (3, 1, 1, 1)),
+                      (0, (3, 1, 1, 1, 1, 1)),
+                      (0, (3, 5, 1, 5, 1, 5)),
+                      '--', '-', '-.', ':']
+    marker_size = 10
 
     # ALM
     for xi_alm in xi_vals_alm:
@@ -156,9 +194,12 @@ def compare_alm_algs(prob_name, f_star=None):
                 legends.append(r"\texttt{ALM}-" + legend_xi)
             else:
                 legends.append(r"\texttt{ALM}-" + str(xi_alm))
-        if prob_name == "DUALC1":
+        legends_nu_1.append(r"\texttt{ALM}")
+        if prob_name == "DUALC1" and xi_alm == xi_vals_alm[-1]:
             nu_hist_list.append(np.array(sol_alm.nu_hist))
+            grad_evals_nu.append(grad_evals_alm)
             legends_nu.append(legends[-1])
+            legends_nu_0.append(r"\texttt{ALM}")
             f_hist_nu.append(f_hist_alm)
             feas_meas_nu.append(feas_meas_alm)
         feas_meas_results.append(feas_meas_alm)
@@ -179,9 +220,12 @@ def compare_alm_algs(prob_name, f_star=None):
             legends.append(r"\texttt{P-BALM}")
         else:
             legends.append(r"\texttt{P-BALM}-" + str(alpha))
-        if prob_name == "DUALC1" and alpha == alpha_vals_alm[0]:
+        legends_nu_1.append(r"\texttt{P-BALM}")
+        if prob_name == "DUALC1" and alpha == alpha_vals_alm[-1]:
             nu_hist_list.append(np.array(sol_pbalm.nu_hist))
+            grad_evals_nu.append(grad_evals_pbalm)
             legends_nu.append(legends[-1])
+            legends_nu_0.append(r"\texttt{P-BALM}")
             f_hist_nu.append(f_hist_pbalm)
             feas_meas_nu.append(feas_meas_pbalm)
         feas_meas_results.append(feas_meas_pbalm)
@@ -202,15 +246,21 @@ def compare_alm_algs(prob_name, f_star=None):
             legends.append(r"\texttt{BALM}")
         else:
             legends.append(r"\texttt{BALM}-" + str(alpha))
-        if prob_name == "DUALC1" and alpha == alpha_vals_alm[0]:
+        legends_nu_1.append(r"\texttt{BALM}")
+        if prob_name == "DUALC1" and alpha == alpha_vals_alm[-1]:
             nu_hist_list.append(np.array(sol_balm.nu_hist))
+            grad_evals_nu.append(grad_evals_balm)
             legends_nu.append(legends[-1])
+            legends_nu_0.append(r"\texttt{BALM}")
             f_hist_nu.append(f_hist_balm)
             feas_meas_nu.append(feas_meas_balm)
         feas_meas_results.append(feas_meas_balm)
         grad_evals_results.append(grad_evals_balm)
         f_hist_results.append(f_hist_balm)
         problem.reset_counters()
+
+    if len(alpha_vals_alm) == 1 and len(xi_vals_alm) == 1:
+        legends = legends_nu_1
 
     setup_matplotlib(24, 24)
     plt.figure(figsize=(7,5), dpi=300)
@@ -219,7 +269,13 @@ def compare_alm_algs(prob_name, f_star=None):
             label = None
         else:
             label = legend
-        plt.plot(grad_evals, np.maximum(tot_inf, 1e-6), label=label, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none')
+        plt.plot(grad_evals, np.maximum(tot_inf, 1e-6), label=label, marker=markers[idx % len(markers)],
+                 markevery=0.1, markerfacecolor='none',
+                 color=colors[idx % len(colors)],
+                #  linestyle=linestyles[idx % len(linestyles)],
+                linestyle='dashdot',
+                 markersize=marker_size
+                 )
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel(r'grad evals')
@@ -247,11 +303,17 @@ def compare_alm_algs(prob_name, f_star=None):
             label = None
         else:
             label = legend
-        plt.plot(grad_evals, np.maximum(np.abs(fx_minus_fxstar)/np.abs(f_star), 5e-6), label=label, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none')
+        plt.plot(grad_evals, np.maximum(np.abs(fx_minus_fxstar)/np.abs(f0_f_star), 1e-6), label=label,
+                 marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
+                 color=colors[idx % len(colors)],
+                #  linestyle=linestyles[idx % len(linestyles)],
+                linestyle='dashdot',
+                 markersize=marker_size
+                 )
     plt.xscale('log')
     plt.yscale('log')
     # plt.xlabel(r'grad evals')
-    plt.ylabel(r'$\frac{|f(x^k) - f^\star|}{|f^\star|}$')
+    plt.ylabel(r'$\frac{|f(x^k) - f^\star|}{|f(x^0) - f^\star|}$')
     plt.grid(True, which='major', ls='--')
     plt.title(rf'\texttt{{{prob_name}}} ($\kappa(Q)=\textrm{{\textbf{{{cond_Q:.2E}}}}}$)')
     if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
@@ -272,9 +334,14 @@ def compare_alm_algs(prob_name, f_star=None):
         fig_leg, ax_leg = plt.subplots(figsize=(7, 1), dpi=300)
         handles = []
         for idx, legend in enumerate(legends):
-            handle, = ax_leg.plot([], [], marker=markers[idx % len(markers)], markerfacecolor='none')
+            handle, = ax_leg.plot([], [], marker=markers[idx % len(markers)], markerfacecolor='none',
+                                  color=colors[idx % len(colors)],
+                                #   linestyle=linestyles[idx % len(linestyles)],
+                                linestyle='dashdot',
+                                  markersize=marker_size
+                                  )
             handles.append(handle)
-        ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends))
+        ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends)//2)
         ax_leg.axis('off')
         # plt.tight_layout()
         fname_leg = f"legend_MM_0.pdf"
@@ -284,41 +351,71 @@ def compare_alm_algs(prob_name, f_star=None):
 
 
     ##### PLOT nu_hist #####
-    if prob_name == "DUALC1":
-
+    if prob_name == "DUALC1" and tol < 1e-5:
+        colors = ['dimgray', 'red', 'black', 'darkred', 'darkgoldenrod', 'royalblue', 'rebeccapurple', 'saddlebrown', 'darkslategray', 'darkorange', 'steelblue', 'lightcoral']
         plt.figure(figsize=(7,5), dpi=300)
-        for idx, (nu_hist, tot_inf, legend) in enumerate(zip(nu_hist_list, feas_meas_nu, legends_nu)):
-            plt.plot(nu_hist, np.maximum(tot_inf, 1e-6), label=legend, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none')
+        for idx, (nu_hist, tot_inf, legend) in enumerate(zip(nu_hist_list, feas_meas_nu, legends_nu_0)):
+            plt.plot(tot_inf[1:], nu_hist[1:], label=legend,
+                     marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
+                     color=colors[idx % len(colors)],
+                     linestyle=linestyles[idx % len(linestyles)],
+                     markersize=marker_size
+                     )
         plt.xscale('log')
         plt.yscale('log')
-        plt.xlabel(r'$\nu_k$')
-        plt.ylabel(r'total infeas')
+        plt.gca().invert_xaxis()
+        # plt.ylabel(r'$\nu_k$')
+        plt.xlabel(r'total infeas')
         plt.grid(True, which='major', ls='--')
-        # plt.title(rf'\texttt{{{prob_name}}} ($\kappa(Q)=\textrm{{\textbf{{{cond_Q:.2E}}}}}$)')
-        plt.legend(fontsize=18, loc='lower left')
+        plt.legend(fontsize=18, loc='upper center')
         plt.tight_layout()
-        fname = f"nu_hist_{prob_name}_phi_{phi_strategy}.pdf"
+        fname = f"nu_totinf_{prob_name}_phi_{phi_strategy}.pdf"
         plt.savefig(fname, format='pdf', bbox_inches='tight')
         plt.close()
 
 
         plt.figure(figsize=(7,5), dpi=300)
-        for idx, (nu_hist, f_hist, legend) in enumerate(zip(nu_hist_list, f_hist_nu, legends_nu)):
-            plt.plot(nu_hist, np.maximum(np.abs(f_hist)/np.abs(f_star), 5e-6), label=legend, marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none')
+        for idx, (nu_hist, fx_minus_fxstar, legend) in enumerate(zip(nu_hist_list, f_hist_nu, legends_nu_0)):
+            plt.plot(np.maximum(np.abs(fx_minus_fxstar)/np.abs(f0_f_star), 1e-9), nu_hist, label=legend,
+                     marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
+                     color=colors[idx % len(colors)],
+                     linestyle=linestyles[idx % len(linestyles)],
+                     markersize=marker_size
+                     )
         plt.xscale('log')
         plt.yscale('log')
+        plt.gca().invert_xaxis()
         # plt.xlabel(r'$\nu_k$')
-        plt.ylabel(r'$\frac{|f(x^k) - f^\star|}{|f^\star|}$')
+        plt.xlabel(r'$|f(x^k) - f^\star|/|f(x^0) - f^\star|$')
+        # plt.ylabel(r'$\rho_k$')
         plt.grid(True, which='major', ls='--')
-        plt.title(rf'\texttt{{{prob_name}}} ($\kappa(Q)=\textrm{{\textbf{{{cond_Q:.2E}}}}}$)')
-        plt.legend(fontsize=18, loc='lower left')
+        plt.legend(fontsize=18, loc='upper center')
         plt.tight_layout()
-        fname = f"nu_hist_fx_minus_fxstar_{prob_name}_phi_{phi_strategy}.pdf"
+        fname = f"nu_fhist_{prob_name}_phi_{phi_strategy}.pdf"
         plt.savefig(fname, format='pdf', bbox_inches='tight')
         plt.close()
 
-# compare_alm_algs("GENHS28")
+        plt.figure(figsize=(7,5), dpi=300)
+        # sel = [1,4,5]
+        for idx, (grad_evals, nu_hist, legend) in enumerate(zip(grad_evals_nu, nu_hist_list, legends_nu_0)):
+            plt.plot(nu_hist, label=legend, marker=markers[idx % len(markers)],
+                     markevery=0.1, markerfacecolor='none',
+                     color=colors[idx % len(colors)],
+                     linestyle=linestyles[idx % len(linestyles)],
+                     markersize=marker_size
+                     )
+        plt.yscale('log')
+        plt.xlabel(r'n. iterations')
+        plt.ylabel(r'$\nu_k$')
+        plt.grid(True, which='major', ls='--')
+        plt.legend(fontsize=18, loc='upper left')
+        plt.tight_layout()
+        fname = f"nu_iter_{prob_name}_phi_{phi_strategy}.pdf"
+        plt.savefig(fname, format='pdf', bbox_inches='tight')
+        plt.close()
+
+compare_alm_algs("GENHS28")
 # compare_alm_algs("DUALC1")
-compare_alm_algs("LOTSCHD")
+# compare_alm_algs("LOTSCHD")
 # compare_alm_algs("CVXQP2_M")
 # compare_alm_algs("AUG3D")
