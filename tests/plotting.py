@@ -1,25 +1,25 @@
 import matplotlib
+import seaborn as sns
 
-def setup_matplotlib(font_size=20, font_size_label=24):
+from matplotlib import style
+import scienceplots
+
+def setup_matplotlib(font_scale=2.5, style_name="science", grid=True):
+    if grid:
+        sns.set_style(style.library[style_name])
+        matplotlib.rcParams.update({'axes.axisbelow': True, 'axes.grid': True, 'grid.alpha': 0.5, 'grid.color': 'k', 'grid.linestyle': '--', 'grid.linewidth': 0.5, 'legend.fancybox': True, 'legend.framealpha': 1.0, 'legend.frameon': True, 'legend.numpoints': 1})
+    else:
+        sns.set_style(style.library[style_name])
+        matplotlib.rcParams.update({'axes.grid': False, 'legend.fancybox': True, 'legend.frameon': True, 'legend.numpoints': 1})
+
+    sns.set_context("paper", font_scale=font_scale,
+                  rc={"lines.linewidth": 3,
+                      "mathtext.fontset": "stix",
+                  })
+    
     matplotlib.rcParams['text.usetex'] = True
     matplotlib.rcParams['text.latex.preamble'] = (
         r'\usepackage{amsmath,amssymb}'
         r'\boldmath'
         r'\bfseries'
     )
-
-    matplotlib.rcParams['font.size'] = font_size
-    matplotlib.rcParams['axes.titlesize'] = font_size
-    matplotlib.rcParams['axes.labelsize'] = font_size
-    matplotlib.rcParams['xtick.labelsize'] = font_size_label
-    matplotlib.rcParams['ytick.labelsize'] = font_size_label
-    matplotlib.rcParams['legend.fontsize'] = font_size
-    matplotlib.rcParams['figure.titlesize'] = font_size
-    matplotlib.rcParams['lines.linewidth'] = 3
-    matplotlib.rcParams['legend.frameon'] = True
-    matplotlib.rcParams['mathtext.fontset'] = 'cm'
-    matplotlib.rcParams['mathtext.rm'] = 'serif'
-    matplotlib.rcParams['mathtext.it'] = 'serif:italic'
-    matplotlib.rcParams['mathtext.bf'] = 'serif:bold'
-    matplotlib.rcParams['axes.labelweight'] = 'bold'
-    matplotlib.rcParams['axes.titleweight'] = 'bold'

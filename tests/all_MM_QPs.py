@@ -21,6 +21,14 @@ if not jax.config.jax_enable_x64:
     jax.config.update("jax_enable_x64", True)
 
 
+def safe_for_plot(arr, max_finite=1e10):
+    arr = np.asarray(arr)
+    arr = np.where(np.isposinf(arr), max_finite, arr)
+    arr = np.where(np.isneginf(arr), -max_finite, arr)
+    arr = np.where(arr > max_finite, max_finite, arr)
+    arr = np.where(arr < -max_finite, -max_finite, arr)
+    return arr
+
 def compare_alm_algs(prob_name, f_star=None):
 
     mm_qps_dir = Path.home() / "opt" / "CUTEST" / "compiled_QP_MM"
@@ -72,11 +80,13 @@ def compare_alm_algs(prob_name, f_star=None):
     g0 = g(x0)
     mu0 = jnp.array(rng.standard_normal(g0.shape))
 
-    tol = 1e-5
-    max_iter = 2000
+    # tol = 1e-5
+    tol = 1e-15
 
-    # tol = 1e-16
-    # max_iter = 50
+    if tol < 1e-5:
+        max_iter = 50
+    else:
+        max_iter = 2000
 
 
     fp_tol = 5e-3
@@ -114,11 +124,13 @@ def compare_alm_algs(prob_name, f_star=None):
     #################### MAIN ALGORITHM COMPARISON ####################
 
     ### this is used with pbalm_org
-    if prob_name in ["GENHS28", "DUALC1"]:
-        alpha_vals_alm = [4, 6, 9, 12]
-        xi_vals_alm = [2, 4, 7, 10]
-        # alpha_vals_alm = [12]
-        # xi_vals_alm = [10]
+    if prob_name in ["AUG3D", "GENHS28"]:
+        if tol < 1e-5:
+            alpha_vals_alm = [12]
+            xi_vals_alm = [10]
+        else:
+            alpha_vals_alm = [4, 6, 9, 12]
+            xi_vals_alm = [2, 4, 7, 10]
     else:
         alpha_vals_alm = [12]
         xi_vals_alm = [10]
@@ -181,7 +193,7 @@ def compare_alm_algs(prob_name, f_star=None):
     # ALM
     for xi_alm in xi_vals_alm:
         sol_alm = pbalm.solve(
-            problem, x0, mu0=mu0, use_proximal=False, tol=tol, fp_tol=fp_tol, max_iter=max_iter, start_feas=False, no_reset=True, inner_solver="PANOC", phi_strategy="linear", xi1=xi_alm, xi2=xi_alm, beta=0.5, Lip_grad_est=Lip_grad_est, adaptive_fp_tol=adaptive_fp_tol, rho0=1e-3, nu0=1e-3
+            problem, x0, mu0=mu0, use_proximal=False, tol=tol, fp_tol=fp_tol, max_iter=max_iter, start_feas=True, no_reset=True, inner_solver="PANOC", phi_strategy="linear", xi1=xi_alm, xi2=xi_alm, beta=0.5, Lip_grad_est=Lip_grad_est, adaptive_fp_tol=adaptive_fp_tol, rho0=1e-3, nu0=1e-3
         )
         feas_meas_alm = np.array(sol_alm.total_infeas)
         grad_evals_alm = sol_alm.grad_evals
@@ -195,7 +207,7 @@ def compare_alm_algs(prob_name, f_star=None):
             else:
                 legends.append(r"\texttt{ALM}-" + str(xi_alm))
         legends_nu_1.append(r"\texttt{ALM}")
-        if prob_name == "DUALC1" and xi_alm == xi_vals_alm[-1]:
+        if prob_name == "AUG3D" and xi_alm == xi_vals_alm[-1]:
             nu_hist_list.append(np.array(sol_alm.nu_hist))
             grad_evals_nu.append(grad_evals_alm)
             legends_nu.append(legends[-1])
@@ -221,7 +233,7 @@ def compare_alm_algs(prob_name, f_star=None):
         else:
             legends.append(r"\texttt{P-BALM}-" + str(alpha))
         legends_nu_1.append(r"\texttt{P-BALM}")
-        if prob_name == "DUALC1" and alpha == alpha_vals_alm[-1]:
+        if prob_name == "AUG3D" and alpha == alpha_vals_alm[-1]:
             nu_hist_list.append(np.array(sol_pbalm.nu_hist))
             grad_evals_nu.append(grad_evals_pbalm)
             legends_nu.append(legends[-1])
@@ -247,7 +259,7 @@ def compare_alm_algs(prob_name, f_star=None):
         else:
             legends.append(r"\texttt{BALM}-" + str(alpha))
         legends_nu_1.append(r"\texttt{BALM}")
-        if prob_name == "DUALC1" and alpha == alpha_vals_alm[-1]:
+        if prob_name == "AUG3D" and alpha == alpha_vals_alm[-1]:
             nu_hist_list.append(np.array(sol_balm.nu_hist))
             grad_evals_nu.append(grad_evals_balm)
             legends_nu.append(legends[-1])
@@ -262,99 +274,13 @@ def compare_alm_algs(prob_name, f_star=None):
     if len(alpha_vals_alm) == 1 and len(xi_vals_alm) == 1:
         legends = legends_nu_1
 
-    setup_matplotlib(24, 24)
-    plt.figure(figsize=(7,5), dpi=300)
-    for idx, (grad_evals, tot_inf, legend) in enumerate(zip(grad_evals_results, feas_meas_results, legends)):
-        if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
-            label = None
-        else:
-            label = legend
-        plt.plot(grad_evals, np.maximum(tot_inf, 1e-6), label=label, marker=markers[idx % len(markers)],
-                 markevery=0.1, markerfacecolor='none',
-                 color=colors[idx % len(colors)],
-                #  linestyle=linestyles[idx % len(linestyles)],
-                linestyle='dashdot',
-                 markersize=marker_size
-                 )
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlabel(r'grad evals')
-    # plt.xlabel('iter')
-    # plt.ylabel('tot inf')
-    # plt.ylabel(r'$\max\{\|h(x^k)\|_{\infty}, \|E^k\|_{\infty}\}$')
-    plt.ylabel(r'total infeas')
-    plt.grid(True, which='major', ls='--')
-    # plt.title(rf'\texttt{{{prob_name}}} ($\kappa(Q)=\textrm{{\textbf{{{cond_Q:.2E}}}}}$)')
-    if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
-        plt.legend(fontsize=18, loc='lower left')
-    ax = plt.gca()
-    formatter = mticker.ScalarFormatter(useMathText=True)
-    formatter.set_powerlimits((0, 0))
-    ax.xaxis.set_major_formatter(formatter)
-    ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
-    plt.tight_layout()
-    fname = f"alm_algs_{prob_name}_phi_{phi_strategy}.pdf"
-    plt.savefig(fname, format='pdf', bbox_inches='tight')
-    plt.close()
 
-    plt.figure(figsize=(7,5), dpi=300)
-    for idx, (grad_evals, fx_minus_fxstar, legend) in enumerate(zip(grad_evals_results, f_hist_results, legends)):
-        if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
-            label = None
-        else:
-            label = legend
-        plt.plot(grad_evals, np.maximum(np.abs(fx_minus_fxstar)/np.abs(f0_f_star), 1e-6), label=label,
-                 marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
-                 color=colors[idx % len(colors)],
-                #  linestyle=linestyles[idx % len(linestyles)],
-                linestyle='dashdot',
-                 markersize=marker_size
-                 )
-    plt.xscale('log')
-    plt.yscale('log')
-    # plt.xlabel(r'grad evals')
-    plt.ylabel(r'$\frac{|f(x^k) - f^\star|}{|f(x^0) - f^\star|}$')
-    plt.grid(True, which='major', ls='--')
-    plt.title(rf'\texttt{{{prob_name}}} ($\kappa(Q)=\textrm{{\textbf{{{cond_Q:.2E}}}}}$)')
-    if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
-        plt.legend(fontsize=18, loc='lower left')
-    ax = plt.gca()
-    formatter = mticker.ScalarFormatter(useMathText=True)
-    formatter.set_powerlimits((0, 0))
-    ax.xaxis.set_major_formatter(formatter)
-    ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
-
-    plt.tight_layout()
-    fname = f"alm_algs_fx_minus_fxstar_{prob_name}_phi_{phi_strategy}.pdf"
-    plt.savefig(fname, format='pdf', bbox_inches='tight')
-    plt.close()
-
-
-    if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
-        fig_leg, ax_leg = plt.subplots(figsize=(7, 1), dpi=300)
-        handles = []
-        for idx, legend in enumerate(legends):
-            handle, = ax_leg.plot([], [], marker=markers[idx % len(markers)], markerfacecolor='none',
-                                  color=colors[idx % len(colors)],
-                                #   linestyle=linestyles[idx % len(linestyles)],
-                                linestyle='dashdot',
-                                  markersize=marker_size
-                                  )
-            handles.append(handle)
-        ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends)//2)
-        ax_leg.axis('off')
-        # plt.tight_layout()
-        fname_leg = f"legend_MM_0.pdf"
-        plt.savefig(fname_leg, format='pdf', bbox_inches='tight')
-        plt.close(fig_leg)
-
-
-
-    ##### PLOT nu_hist #####
-    if prob_name == "DUALC1" and tol < 1e-5:
+    if prob_name == "AUG3D" and tol < 1e-5:
+        setup_matplotlib(font_scale=3, grid=False)
         colors = ['dimgray', 'red', 'black', 'darkred', 'darkgoldenrod', 'royalblue', 'rebeccapurple', 'saddlebrown', 'darkslategray', 'darkorange', 'steelblue', 'lightcoral']
         plt.figure(figsize=(7,5), dpi=300)
         for idx, (nu_hist, tot_inf, legend) in enumerate(zip(nu_hist_list, feas_meas_nu, legends_nu_0)):
+            tot_inf = safe_for_plot(tot_inf)
             plt.plot(tot_inf[1:], nu_hist[1:], label=legend,
                      marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
                      color=colors[idx % len(colors)],
@@ -365,9 +291,8 @@ def compare_alm_algs(prob_name, f_star=None):
         plt.yscale('log')
         plt.gca().invert_xaxis()
         # plt.ylabel(r'$\nu_k$')
-        plt.xlabel(r'total infeas')
-        plt.grid(True, which='major', ls='--')
-        plt.legend(fontsize=18, loc='upper center')
+        plt.xlabel(r'$\textbf{total infeas}$')
+        plt.legend(fontsize=18, loc='lower right')
         plt.tight_layout()
         fname = f"nu_totinf_{prob_name}_phi_{phi_strategy}.pdf"
         plt.savefig(fname, format='pdf', bbox_inches='tight')
@@ -376,7 +301,8 @@ def compare_alm_algs(prob_name, f_star=None):
 
         plt.figure(figsize=(7,5), dpi=300)
         for idx, (nu_hist, fx_minus_fxstar, legend) in enumerate(zip(nu_hist_list, f_hist_nu, legends_nu_0)):
-            plt.plot(np.maximum(np.abs(fx_minus_fxstar)/np.abs(f0_f_star), 1e-9), nu_hist, label=legend,
+            fx_minus_fxstar = safe_for_plot(fx_minus_fxstar)
+            plt.plot(np.abs(fx_minus_fxstar)/np.abs(f0_f_star), nu_hist, label=legend,
                      marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
                      color=colors[idx % len(colors)],
                      linestyle=linestyles[idx % len(linestyles)],
@@ -386,10 +312,9 @@ def compare_alm_algs(prob_name, f_star=None):
         plt.yscale('log')
         plt.gca().invert_xaxis()
         # plt.xlabel(r'$\nu_k$')
-        plt.xlabel(r'$|f(x^k) - f^\star|/|f(x^0) - f^\star|$')
+        plt.xlabel(r'$|f_1(x^k) - f_1^\star|/|f_1(x^0) - f_1^\star|$')
         # plt.ylabel(r'$\rho_k$')
-        plt.grid(True, which='major', ls='--')
-        plt.legend(fontsize=18, loc='upper center')
+        plt.legend(fontsize=18, loc='lower right')
         plt.tight_layout()
         fname = f"nu_fhist_{prob_name}_phi_{phi_strategy}.pdf"
         plt.savefig(fname, format='pdf', bbox_inches='tight')
@@ -407,15 +332,100 @@ def compare_alm_algs(prob_name, f_star=None):
         plt.yscale('log')
         plt.xlabel(r'n. iterations')
         plt.ylabel(r'$\nu_k$')
-        plt.grid(True, which='major', ls='--')
-        plt.legend(fontsize=18, loc='upper left')
+        plt.legend(fontsize=18, loc='lower right')
         plt.tight_layout()
         fname = f"nu_iter_{prob_name}_phi_{phi_strategy}.pdf"
         plt.savefig(fname, format='pdf', bbox_inches='tight')
         plt.close()
+    else:
+        setup_matplotlib()
+        plt.figure(figsize=(7,5), dpi=300)
+        for idx, (grad_evals, tot_inf, legend) in enumerate(zip(grad_evals_results, feas_meas_results, legends)):
+            tot_inf = safe_for_plot(tot_inf)
+            if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
+                label = None
+            else:
+                label = legend
+            plt.plot(grad_evals, np.maximum(tot_inf, 1e-6), label=label, marker=markers[idx % len(markers)],
+                    markevery=0.1, markerfacecolor='none',
+                    color=colors[idx % len(colors)],
+                    #  linestyle=linestyles[idx % len(linestyles)],
+                    linestyle='dashdot',
+                    markersize=marker_size
+                    )
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.xlabel(r'$\textbf{grad evals}$')
+        # plt.xlabel('iter')
+        # plt.ylabel('tot inf')
+        # plt.ylabel(r'$\max\{\|h(x^k)\|_{\infty}, \|E^k\|_{\infty}\}$')
+        plt.ylabel(r'$\textbf{total infeas}$')
+        # plt.title(rf'\texttt{{{prob_name}}} ($\kappa(Q)=\textrm{{\textbf{{{cond_Q:.2E}}}}}$)')
+        if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
+            plt.legend(fontsize=18, loc='lower left')
+        ax = plt.gca()
+        formatter = mticker.ScalarFormatter(useMathText=True)
+        formatter.set_powerlimits((0, 0))
+        ax.xaxis.set_major_formatter(formatter)
+        ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+        plt.tight_layout()
+        fname = f"alm_algs_{prob_name}_phi_{phi_strategy}.pdf"
+        plt.savefig(fname, format='pdf', bbox_inches='tight')
+        plt.close()
 
-compare_alm_algs("GENHS28")
+        plt.figure(figsize=(7,5), dpi=300)
+        for idx, (grad_evals, fx_minus_fxstar, legend) in enumerate(zip(grad_evals_results, f_hist_results, legends)):
+            if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
+                label = None
+            else:
+                label = legend
+            fx_minus_fxstar = safe_for_plot(fx_minus_fxstar)
+            plt.plot(grad_evals, np.maximum(np.abs(fx_minus_fxstar)/np.abs(f0_f_star), 1e-7), label=label,
+                    marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
+                    color=colors[idx % len(colors)],
+                    #  linestyle=linestyles[idx % len(linestyles)],
+                    linestyle='dashdot',
+                    markersize=marker_size
+                    )
+        plt.xscale('log')
+        plt.yscale('log')
+        # plt.xlabel(r'$\textbf{grad evals}$')
+        plt.ylabel(r'$\frac{|f_1(x^k) - f_1^\star|}{|f_1(x^0) - f_1^\star|}$')
+        plt.title(rf'\texttt{{{prob_name}}} ($\kappa(Q)=\textrm{{\textbf{{{cond_Q:.2E}}}}}$)')
+        if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
+            plt.legend(fontsize=18, loc='lower left')
+        ax = plt.gca()
+        formatter = mticker.ScalarFormatter(useMathText=True)
+        formatter.set_powerlimits((0, 0))
+        ax.xaxis.set_major_formatter(formatter)
+        ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+
+        plt.tight_layout()
+        fname = f"alm_algs_fx_minus_fxstar_{prob_name}_phi_{phi_strategy}.pdf"
+        plt.savefig(fname, format='pdf', bbox_inches='tight')
+        plt.close()
+
+
+        if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
+            fig_leg, ax_leg = plt.subplots(figsize=(7, 1), dpi=300)
+            handles = []
+            for idx, legend in enumerate(legends):
+                handle, = ax_leg.plot([], [], marker=markers[idx % len(markers)], markerfacecolor='none',
+                                    color=colors[idx % len(colors)],
+                                    #   linestyle=linestyles[idx % len(linestyles)],
+                                    linestyle='dashdot',
+                                    markersize=marker_size
+                                    )
+                handles.append(handle)
+            ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends)//2)
+            ax_leg.axis('off')
+            # plt.tight_layout()
+            fname_leg = f"legend_MM_0.pdf"
+            plt.savefig(fname_leg, format='pdf', bbox_inches='tight')
+            plt.close(fig_leg)
+
+# compare_alm_algs("GENHS28")
 # compare_alm_algs("DUALC1")
-# compare_alm_algs("LOTSCHD")
+compare_alm_algs("LOTSCHD")
 # compare_alm_algs("CVXQP2_M")
 # compare_alm_algs("AUG3D")

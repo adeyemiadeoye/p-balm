@@ -19,7 +19,7 @@ class GradEvalCounter:
         self.count = 0
 
 class Problem:
-    def __init__(self, f, reg=None, reg_lbda=0.0, h=None, g=None, f_grad=None, h_grad=None, g_grad=None, jittable=False):
+    def __init__(self, f, reg=None, reg_lbda=0.0, h=None, g=None, f_grad=None, h_grad=None, g_grad=None, jittable=False, callback=None):
         self.f = jax.jit(f) if jittable else f
         self.reg = reg
         self.reg_lbda = reg_lbda
@@ -34,6 +34,7 @@ class Problem:
             self.h_grad = GradEvalCounter(h_grad if h and h_grad else (jacfwd(self.h) if h else None))
             self.g_grad = GradEvalCounter(g_grad if g and g_grad else (jacfwd(self.g) if g else None))
         self.jittable = jittable
+        self.callback = callback
     def reset_counters(self):
         if hasattr(self, 'f_grad') and hasattr(self.f_grad, 'reset'):
             self.f_grad.reset()
@@ -83,7 +84,6 @@ class Solution:
         self.total_runtime = None
         self.solve_runtime = None
         self.patience = patience
-        self.f_star_hist = []
         self.feas_reset_interval = feas_reset_interval
         self.reset_x0 = x0
         self.no_reset = no_reset
@@ -199,6 +199,18 @@ class Solution:
                 self.solve_status = "MaxRuntimeExceeded"
                 break
             self.alm_grad_fn = GradEvalCounter(jax.grad(L_aug)) if not self.problem.jittable else GradEvalCounter(jax.jit(jax.grad(L_aug)))
+            if self.problem.callback is not None:
+                self.problem.callback(
+                    iter=i,
+                    x=x,
+                    x_prev=x_prev,
+                    lbda=lbda,
+                    mu=mu,
+                    rho=rho_vec,
+                    nu=nu_vec,
+                    gamma_k=self.gamma_k,
+                    x0=self.x0
+                )
             if i == 0 and self.verbosity > 0:
                 self.grad_evals.append(0)
                 h_x = self.problem.h(x) if self.problem.h else jnp.array([])
@@ -300,6 +312,18 @@ class Solution:
                     print(f"{'nu:':<25} {jnp.max(nu_vec) if nu_vec is not None else 0:.6e}")
                     print(f"{'gamma:':<25} {self.gamma_k:.6e}")
                 self.solve_status = "NaNOrInf"
+                if self.problem.callback is not None:
+                    self.problem.callback(
+                        iter=i+1,
+                        x=x,
+                        x_prev=x_prev,
+                        lbda=lbda,
+                        mu=mu,
+                        rho=rho_vec,
+                        nu=nu_vec,
+                        gamma_k=self.gamma_k,
+                        x0=self.x0
+                    )
                 break
 
             h_x = self.problem.h(x_new) if self.problem.h else jnp.array([])
@@ -423,6 +447,18 @@ class Solution:
                     print(f"{'gamma:':<25} {self.gamma_k:.6e}")
                     print(f"{'prox_term_i:':<25} {prox_term_i:.6e}")
                     self.solve_status = "Converged"
+                if self.problem.callback is not None:
+                    self.problem.callback(
+                        iter=i+1,
+                        x=x,
+                        x_prev=x_prev,
+                        lbda=lbda,
+                        mu=mu,
+                        rho=rho_vec,
+                        nu=nu_vec,
+                        gamma_k=self.gamma_k,
+                        x0=self.x0
+                    )
                 break
             elif (i + 1) == self.max_iter and self.verbosity > 0:
                 if self.verbosity > 0:
@@ -436,6 +472,18 @@ class Solution:
                     print(f"{'nu:':<25} {jnp.max(nu_vec) if nu_vec is not None else 0:.6e}")
                     print(f"{'gamma:':<25} {self.gamma_k:.6e}")
                 self.solve_status = "Stopped"
+                if self.problem.callback is not None:
+                    self.problem.callback(
+                        iter=i+1,
+                        x=x,
+                        x_prev=x_prev,
+                        lbda=lbda,
+                        mu=mu,
+                        rho=rho_vec,
+                        nu=nu_vec,
+                        gamma_k=self.gamma_k,
+                        x0=self.x0
+                    )
 
             if self.feas_reset_interval is not None and self.feas_reset_interval > 0 and (i + 1) % self.feas_reset_interval == 0:
                 if self._is_feasible(x):
