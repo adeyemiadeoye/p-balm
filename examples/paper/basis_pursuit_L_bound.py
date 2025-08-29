@@ -8,8 +8,6 @@ from plotting import setup_matplotlib
 import gurobipy as gp
 from gurobipy import GRB
 
-from mpl_toolkits.mplot3d import Axes3D  # Add this import at the top if not present
-
 jax.config.update('jax_platform_name', 'cpu')
 if not jax.config.jax_enable_x64:
     jax.config.update("jax_enable_x64", True)
@@ -100,8 +98,8 @@ def run_basis_pursuit_benchmark(p, n, k, alpha=None, xi=None):
     h0 = h(x0)
     lbda0 = jnp.array(rng.standard_normal(h0.shape))
 
-    tol = 1e-4
-    max_iter = 2000
+    tol = 1e-9
+    max_iter = 50
     fp_tol = 5e-3
     
     f_star = f(x_star)
@@ -141,20 +139,19 @@ def run_basis_pursuit_benchmark(p, n, k, alpha=None, xi=None):
     plt.plot(L_aug_values, label=r"$\mathcal{L}_{\rho_k,\nu_k,\gamma_k}(x^{k+1},\lambda^k,\mu^k;x^k) + f_2(x^{k+1})$", color=colors[1], marker=markers[1], linestyle=linestyles[1], markersize=10, markevery=0.1, markerfacecolor='none', linewidth=3.5)
     plt.yscale('symlog', linthresh=1)
     plt.xlabel(r'$k$')
-    plt.legend(fontsize=15, loc='lower right')
+    plt.legend(fontsize=16, loc='lower right')
     plt.tight_layout()
     plt.savefig("L_aug_vs_ref_curve.pdf", format='pdf', bbox_inches='tight')
     plt.close()
 
     plt.figure(figsize=(7, 5), dpi=300)
     plt.plot(sol_pbalm.prox_hist, color=colors[1], marker=markers[1], linestyle=linestyles[1], markersize=10, markevery=0.1, markerfacecolor='none', linewidth=3.5)
-    plt.yscale('symlog', linthresh=1)
+    # plt.yscale('symlog', linthresh=1)
+    plt.yscale('log')
     plt.xlabel(r'$k$')
     plt.ylabel(r"$\frac{1}{2\gamma_k}\|x^{k+1} - x^k\|^2$")
     plt.tight_layout()
     plt.savefig("prox_term_hist.pdf", format='pdf', bbox_inches='tight')
     plt.close()
 
-run_basis_pursuit_benchmark(400, 1024, 10, alpha=3)
-
-# run_basis_pursuit_benchmark(400, 1024, 10, xi=4)
+run_basis_pursuit_benchmark(400, 1024, 10, alpha=4)

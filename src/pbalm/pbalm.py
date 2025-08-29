@@ -156,7 +156,7 @@ class Solution:
             if self.start_feas:
                 if self.verbosity > 0:
                     print("Initial point is not feasible. Finding a feasible point...")
-                self.x0 = phase_I_optim(self.x0, self.problem.h, self.problem.g, self.lbda0, self.mu0, tol=self.phase_I_tol, inner_solver=self.inner_solver)
+                self.x0 = phase_I_optim(self.x0, self.problem.h, self.problem.g, self.problem.reg, self.lbda0, self.mu0, tol=self.phase_I_tol, inner_solver=self.inner_solver)
                 self.reset_x0 = self.x0.copy()
                 warmup_end_time = time.time()
             else:
@@ -211,7 +211,7 @@ class Solution:
                     gamma_k=self.gamma_k,
                     x0=self.x0
                 )
-            if i == 0 and self.verbosity > 0:
+            if i == 0:
                 self.grad_evals.append(0)
                 h_x = self.problem.h(x) if self.problem.h else jnp.array([])
                 g_x = self.problem.g(x) if self.problem.g else jnp.array([])
@@ -229,7 +229,7 @@ class Solution:
                         L0_grad = self._get_prox_L_aug_grad(x, x_prev=x_prev, lbda=lbda, mu=mu, rho=rho_vec, nu=nu_vec, gamma_k=self.gamma_k, aug=True)
                     else:
                         L0_grad = self._get_prox_L_aug_grad(x, lbda=lbda, mu=mu, rho=rho_vec, nu=nu_vec, gamma_k=self.gamma_k, aug=True)
-                if type(self.problem.reg) in [proxop.L1Norm, proxop.BoxConstraint]:
+                if type(self.problem.reg) in [proxop.multi.L1Norm, proxop.indicator.BoxConstraint]:
                     prox_grad_res_i = jnp.linalg.norm(x - self.problem.reg.prox(x - L0_grad), jnp.inf)
                 elif type(self.problem.reg) == type(None): # this won't be the case though (case handled above)
                     prox_grad_res_i = jnp.linalg.norm(L0_grad, jnp.inf)
@@ -244,8 +244,9 @@ class Solution:
                 self.nu_hist.append(jnp.max(nu_vec) if nu_vec is not None else None)
                 self.gamma_hist.append(self.gamma_k)
                 self.prox_hist.append(prox_term_i)
-                print(
-                    f"{i:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
+                if self.verbosity > 0:
+                    print(
+                        f"{i:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
                 best_f = f_x
                 best_kkt = eps_kkt_res
                 patience_counter = 0
@@ -354,9 +355,9 @@ class Solution:
                         rho_vec = jnp.maximum(self.xi1*rho_vec, jnp.full_like(rho_vec, self.rho0*phi_i))
                 else:
                     prev_h = self.problem.h(x)
-                    for j in range(len(h_x)):
-                        if abs(h_x[j]) > self.beta * abs(prev_h[j]):
-                            rho_vec[j] = jnp.maximum(self.xi1 * rho_vec[j], self.rho0 * phi_i)
+                    mask = jnp.abs(h_x) > self.beta * jnp.abs(prev_h)
+                    rho_candidate = jnp.maximum(self.xi1 * rho_vec, self.rho0 * phi_i)
+                    rho_vec = jnp.where(mask, rho_candidate, rho_vec)
 
             E_x = jnp.minimum(-g_x, jnp.divide(1, nu_vec)*mu) if self.problem.g else jnp.array([])
             prev_g = self.problem.g(x) if self.problem.g else jnp.array([])
@@ -369,9 +370,9 @@ class Solution:
                         nu_vec = jnp.maximum(self.xi2*nu_vec, jnp.full_like(nu_vec, self.nu0*phi_i))
                 else:
                     nrm_E = jnp.max(jnp.abs(E_x))
-                    for j in range(len(E_x)):
-                        if abs(E_x[j]) > self.beta * abs(prev_E[j]):
-                            nu_vec[j] = jnp.maximum(self.xi2*nu_vec[j], self.nu0*phi_i)
+                    mask_E = jnp.abs(E_x) > self.beta * jnp.abs(prev_E)
+                    nu_candidate = jnp.maximum(self.xi2 * nu_vec, self.nu0 * phi_i)
+                    nu_vec = jnp.where(mask_E, nu_candidate, nu_vec)
 
             x = x_new
             mu = mu_new
@@ -381,7 +382,7 @@ class Solution:
             else:
                 prox_term_i = 0.0
 
-            if type(self.problem.reg) in [proxop.L1Norm, proxop.BoxConstraint]:
+            if type(self.problem.reg) in [proxop.multi.L1Norm, proxop.indicator.BoxConstraint]:
                 prox_grad_res_i = jnp.linalg.norm(x - self.problem.reg.prox(x - L0_grad), jnp.inf)
             elif type(self.problem.reg) == type(None): # this won't be the case though (case handled above)
                 prox_grad_res_i = jnp.linalg.norm(L0_grad, jnp.inf)
@@ -640,16 +641,17 @@ class Result:
         self.grad_evals = grad_evals
 
 def solve(problem, x0, lbda0=None, mu0=None, rho0=1e-3, nu0=1e-3, use_proximal=True,
-            gamma0=1e-1, beta=0.5, alpha=8, delta=1, xi1=1.0, xi2=1.0, tol=1e-6, fp_tol=None, max_iter=1000, phase_I_tol=1e-7, 
+            gamma0=1e-1, beta=0.5, alpha=3, delta=1e-6, xi1=1.0, xi2=1.0, tol=1e-6, fp_tol=None, max_iter=1000,
+          phase_I_tol=1e-7,
             start_feas=True, inner_solver=None, pa_direction=None, pa_solver_opts=None, verbosity=1, max_runtime=24.0,
-            phi_strategy="pow", patience=None, feas_reset_interval=None, uniform_pen=True, no_reset=False, Lip_grad_est=None, use_autodiff_alm=True, adaptive_fp_tol=True):
+            phi_strategy="pow", patience=None, feas_reset_interval=None, uniform_pen=True, no_reset=False, Lip_grad_est=None, use_autodiff_alm=True, adaptive_fp_tol=False):
     if inner_solver is None:
         inner_solver = "PANOC"
     else:
-        if inner_solver == "PANOC" and type(problem.reg) not in [proxop.L1Norm, proxop.BoxConstraint, type(None)]:
+        if inner_solver == "PANOC" and type(problem.reg) not in [proxop.multi.L1Norm, proxop.indicator.BoxConstraint, type(None)]:
             print("PANOC solver is only available for L1, BoxConstraint and NoneType regularizers.\nSetting inner_solver to ProxLQNSCORE.")
             inner_solver = "ProxLQNSCORE"
-        elif inner_solver == "ProxLQNSCORE" and (problem.reg is None or type(problem.reg) not in [proxop.L1Norm, proxop.L2Norm, proxop.BoxConstraint, pbalm.SGLPenalty]):
+        elif inner_solver == "ProxLQNSCORE" and (problem.reg is None or type(problem.reg) not in [proxop.multi.L1Norm, proxop.multi.L2Norm, proxop.indicator.BoxConstraint, pbalm.SGLPenalty]):
             print("ProxLQNSCORE solver can only be used with regularizers.\nSetting inner_solver to PANOC.")
             inner_solver = "PANOC"
             

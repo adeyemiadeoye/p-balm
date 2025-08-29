@@ -21,15 +21,15 @@ import jax
 
 def pyscsopt_minimize(x0, f, reg, lbda=1e-2, mu=1.0, C_set=None, group_lasso_P=None, m=10, algo="ProxLQNSCORE", grad_fx=None, ss_type=2, max_iter=100, tol=1e-6, verbose=0, jittable=True):
     if reg:
-        if type(reg) == proxop.L1Norm:
+        if type(reg) == proxop.multi.L1Norm:
             reg_name = "l1"
             lbda = lbda if lbda != 0.0 else 1e-2
             hmu = PHuberSmootherL1L2(mu)
-        elif type(reg) == proxop.L2Norm:
+        elif type(reg) == proxop.multi.L2Norm:
             reg_name = "l2"
             lbda = lbda if lbda != 0.0 else 1e-2
             hmu = PHuberSmootherL1L2(mu)
-        elif type(reg) == proxop.BoxConstraint:
+        elif type(reg) == proxop.indicator.BoxConstraint:
             reg_name = "indbox"
             lbda = 1.0
             C_set = (reg.low, reg.high)
@@ -56,8 +56,8 @@ def pyscsopt_minimize(x0, f, reg, lbda=1e-2, mu=1.0, C_set=None, group_lasso_P=N
 
 
 def jaxopt_minimize(f, x0, reg=None, lbda=None, tol=1e-9, max_iter=2000, grad_fx=None, jittable=False, Lip_grad_est=None):
-        low = reg.low if type(reg) == proxop.BoxConstraint else -jnp.inf
-        high = reg.high if type(reg) == proxop.BoxConstraint else jnp.inf
+        low = reg.low if type(reg) == proxop.indicator.BoxConstraint else -jnp.inf
+        high = reg.high if type(reg) == proxop.indicator.BoxConstraint else jnp.inf
         l1_reg = lbda if lbda is not None else None
 
         stepsize = -1 if Lip_grad_est is None else 0.95/Lip_grad_est
@@ -66,14 +66,14 @@ def jaxopt_minimize(f, x0, reg=None, lbda=None, tol=1e-9, max_iter=2000, grad_fx
         def fun(x):
             return f(x) if grad_fx is None else (f(x), grad_fx(x))
 
-        if type(reg) == proxop.BoxConstraint:
+        if type(reg) == proxop.indicator.BoxConstraint:
             hyperparams_proj = (low, high)
 
             proj_op = projection.projection_box
             solver = ProjectedGradient(fun=fun, projection=proj_op, tol=tol, stepsize=stepsize, maxiter=max_iter, acceleration=True, jit=jittable, value_and_grad=True if grad_fx is not None else False)
             sol = solver.run(x0, hyperparams_proj=hyperparams_proj)
 
-        elif type(reg) == proxop.L1Norm:
+        elif type(reg) == proxop.multi.L1Norm:
                 prox_op = prox.prox_lasso
                 hyperparams_prox = l1_reg
                 solver = ProximalGradient(fun=fun, prox=prox_op, tol=tol, stepsize=stepsize, maxiter=max_iter, acceleration=True, jit=jittable, value_and_grad=True if grad_fx is not None else False)
@@ -86,15 +86,25 @@ def jaxopt_minimize(f, x0, reg=None, lbda=None, tol=1e-9, max_iter=2000, grad_fx
         
         return sol
 
-
 class PaProblem(pa.BoxConstrProblem):
     def __init__(self, f, x0, reg=None, lbda=None, solver_opts=None, tol=1e-9, max_iter=2000, direction=None, grad_fx=None, jittable=True, Lip_grad_est=None):
         super().__init__(x0.shape[0], 0)
         self.obj_f = jax.jit(f) if jittable else f
         self.init_x = x0
-        self.C.lowerbound[:] = reg.low if type(reg) == proxop.BoxConstraint else None
-        self.C.upperbound[:] = reg.high if type(reg) == proxop.BoxConstraint else None
-        self.l1_reg = lbda if lbda is None else [lbda]
+        if type(reg) == proxop.indicator.BoxConstraint:
+            self.C.lowerbound[:] = reg.low
+            self.C.upperbound[:] = reg.high
+        if lbda is not None:
+            if type(lbda) in [float, int]:
+                self.l1_reg = [lbda]
+            elif type(lbda) != list:
+                raise ValueError(f"Invalid L1 regularization type: {type(lbda)}; expected float, int, or list.")
+            elif type(lbda) == list and len(lbda) != x0.shape[0]:
+                raise ValueError(f"Invalid L1 regularization list length: {len(lbda)}; expected {x0.shape[0]}.")
+            else:
+                self.l1_reg = lbda
+        else:
+            self.l1_reg = None
         self.pa_solver_opts = solver_opts
         self.pa_direction = direction
         self.pa_tol = tol
@@ -128,36 +138,41 @@ class PaProblem(pa.BoxConstrProblem):
         sol, stats = self.pa_solver(cnt.problem, {"tolerance": self.pa_tol}, self.init_x)
         # print(self.eval_f(sol))
         return sol, stats, cnt.evaluations.grad_f
-    
-def phase_I_optim(x0, h, g, lbda0, mu0, tol=1e-7, max_iter=500, inner_solver="PANOC"):
+
+def phase_I_optim(x0, h, g, reg, lbda0, mu0, tol=1e-7, max_iter=500, inner_solver="PANOC"):
     x_dim = x0.shape[0]
-    def feas_f(z):
-        if g is not None and h is None:
-            return z[x_dim+1]**2
-        elif g is not None and h is not None:
-            return 0.5*(jnp.linalg.norm(h(z[:x_dim]))**2 + z[x_dim+1]**2)
-        elif h is not None and g is None:
-            return 0.5*jnp.linalg.norm(h(z[:x_dim]))**2
-    
-    def feas_g(z):
-        return g(z[:x_dim]) - z[x_dim+1]
-    
+        
+    if g is not None and h is None:
+        feas_f = lambda z: jnp.sum(z[x_dim+1]**2)
+        feas_g = lambda z: g(z[:x_dim]) - z[x_dim+1]
+    elif g is not None and h is not None:
+        feas_f = lambda z: 0.5*(jnp.sum(h(z[:x_dim])**2) + jnp.sum(z[x_dim+1]**2))
+        feas_g = lambda z: g(z[:x_dim]) - z[x_dim+1]
+    elif h is not None and g is None:
+        feas_f = lambda z: 0.5*jnp.sum(h(z)**2)
+        feas_g = None
+
+    reg_0 = None
+
     feas_prob = pbalm.Problem(
                     f=feas_f,
-                    g=feas_g if g is not None else None,
+                    g=feas_g,
                     h=None,
-                    reg=None,
+                    reg=reg_0,
                     jittable=True
                 )
     if g:
         z0 = jnp.concatenate([x0, jnp.array([0.0])])
     else:
         z0 = x0.copy()
-    feas_res = pbalm.solve(feas_prob, z0, lbda0=lbda0, mu0=mu0, use_proximal=True, tol=tol, fp_tol=1e-3, max_iter=max_iter, start_feas=False, inner_solver=inner_solver, verbosity=0, max_runtime=0.008333)
+    feas_res = pbalm.solve(feas_prob, z0, lbda0=lbda0, mu0=mu0, use_proximal=True, tol=tol, max_iter=max_iter,
+                           start_feas=False, inner_solver=inner_solver, verbosity=0, max_runtime=0.8333)
     if h is not None and g is None:
-        total_infeas = jnp.linalg.norm(h(feas_res.x[:x_dim]))**2
+        total_infeas = jnp.sum(h(feas_res.x[:x_dim])**2)
     else:
         total_infeas = feas_res.total_infeas[-1]
+        if h is not None:
+            total_infeas += jnp.sum(h(feas_res.x[:x_dim])**2)
     if total_infeas <= tol:
         print("Phase I optimization successful.")
     elif total_infeas <= 5e-3:
@@ -165,13 +180,15 @@ def phase_I_optim(x0, h, g, lbda0, mu0, tol=1e-7, max_iter=500, inner_solver="PA
     else:
         print("Phase I optimization failed. Retrying with a different Phase I inner solver...")
         if inner_solver == "JAXOPT":
-            feas_res = pbalm.solve(feas_prob, z0, lbda0=lbda0, mu0=mu0, use_proximal=True, tol=tol, fp_tol=1e-3, max_iter=max_iter, start_feas=False, inner_solver="PANOC", verbosity=0, max_runtime=0.008333)
+            feas_res = pbalm.solve(feas_prob, z0, lbda0=lbda0, mu0=mu0, use_proximal=True, tol=tol, max_iter=max_iter, start_feas=False, inner_solver="PANOC", verbosity=0, max_runtime=0.008333)
         elif inner_solver == "PANOC":
-            feas_res = pbalm.solve(feas_prob, z0, lbda0=lbda0, mu0=mu0, use_proximal=True, tol=tol, fp_tol=1e-3, max_iter=max_iter, start_feas=False, inner_solver="JAXOPT", verbosity=0, max_runtime=0.008333)
+            feas_res = pbalm.solve(feas_prob, z0, lbda0=lbda0, mu0=mu0, use_proximal=True, tol=tol, max_iter=max_iter, start_feas=False, inner_solver="JAXOPT", verbosity=0, max_runtime=0.008333)
         if h is not None and g is None:
-            total_infeas = jnp.linalg.norm(h(feas_res.x[:x_dim]))**2
+            total_infeas = jnp.sum(h(feas_res.x[:x_dim])**2)
         else:
             total_infeas = feas_res.total_infeas[-1]
+            if h is not None:
+                total_infeas += jnp.sum(h(feas_res.x[:x_dim])**2)
         if total_infeas <= tol:
             print("Phase I optimization successful.")
         elif total_infeas <= 5e-3:

@@ -71,15 +71,13 @@ def run_basis_pursuit_benchmark(p, n, k):
     h0 = h(x0)
     lbda0 = jnp.array(rng.standard_normal(h0.shape))
 
-    tol = 1e-4
-    # tol = 1e-6
+    tol = 1e-5
+    # tol = 1e-11
 
-    if tol < 1e-4:
-        max_iter = 150
+    if tol < 1e-5:
+        max_iter = 120
     else:
         max_iter = 2000
-
-    fp_tol = 5e-3
     
     f_star = f(x_star)
     # f_star = solve_gurobi()
@@ -92,10 +90,16 @@ def run_basis_pursuit_benchmark(p, n, k):
     print(f"f0: {f0}")
     f0_f_star = f0 - f_star
 
-    alpha_vals_alm = [3]
+    # alpha_vals_alm = [3]
+    # xi_vals_alm = [4]
+
+    alpha_vals_alm = [4]
     xi_vals_alm = [4]
 
-    # alpha_vals_alm = [3, 4, 9, 12]
+    # alpha_vals_alm = [4, 12]
+    # xi_vals_alm = [4, 10]
+    #
+    # alpha_vals_alm = [4, 6, 9, 12]
     # xi_vals_alm = [2, 4, 7, 10]
     
     phi_strategy = "pow"
@@ -137,7 +141,7 @@ def run_basis_pursuit_benchmark(p, n, k):
     # ALM
     for xi_alm in xi_vals_alm:
         sol_alm = pbalm.solve(
-            problem, x0, lbda0=lbda0, use_proximal=False, tol=tol, fp_tol=fp_tol, max_iter=max_iter, start_feas=True, no_reset=True, inner_solver="PANOC", phi_strategy="linear", xi1=xi_alm, xi2=xi_alm, beta=0.5, adaptive_fp_tol=adaptive_fp_tol, rho0=1e-3, nu0=1e-3
+            problem, x0, lbda0=lbda0, use_proximal=False, tol=tol, max_iter=max_iter, start_feas=True, no_reset=True, inner_solver="PANOC", phi_strategy="linear", xi1=xi_alm, xi2=xi_alm, beta=0.5, adaptive_fp_tol=adaptive_fp_tol, rho0=1e-3, nu0=1e-3
         )
         feas_meas_alm = np.array(sol_alm.total_infeas)
         grad_evals_alm = sol_alm.grad_evals
@@ -154,7 +158,7 @@ def run_basis_pursuit_benchmark(p, n, k):
     # P-BALM
     for alpha in alpha_vals_alm:
         sol_pbalm = pbalm.solve(
-            problem, x0, lbda0=lbda0, use_proximal=True, tol=tol, fp_tol=fp_tol, max_iter=max_iter, start_feas=True,
+            problem, x0, lbda0=lbda0, use_proximal=True, tol=tol, max_iter=300, start_feas=True,
             inner_solver="PANOC", phi_strategy=phi_strategy, xi1=xi, xi2=xi, alpha=alpha, delta=delta, beta=0.5, adaptive_fp_tol=adaptive_fp_tol, rho0=1e-3, nu0=1e-3, gamma0=1e-1
         )
         feas_meas_pbalm = np.array(sol_pbalm.total_infeas)
@@ -172,7 +176,7 @@ def run_basis_pursuit_benchmark(p, n, k):
     # BALM
     for alpha in alpha_vals_alm:
         sol_balm = pbalm.solve(
-            problem, x0, lbda0=lbda0, use_proximal=False, tol=tol, fp_tol=fp_tol, max_iter=max_iter, start_feas=True,
+            problem, x0, lbda0=lbda0, use_proximal=False, tol=tol, max_iter=300, start_feas=True,
             inner_solver="PANOC", phi_strategy=phi_strategy, xi1=xi, xi2=xi, alpha=alpha, beta=0.5, adaptive_fp_tol=adaptive_fp_tol, rho0=1e-3, nu0=1e-3
         )
         feas_meas_balm = np.array(sol_balm.total_infeas)
@@ -190,7 +194,7 @@ def run_basis_pursuit_benchmark(p, n, k):
     if len(alpha_vals_alm) == 1 and len(xi_vals_alm) == 1:
         legends = legends_rho_0
 
-    if tol < 1e-4: # for illustration purposes
+    if tol < 1e-5: # for illustration purposes
         setup_matplotlib(style_name="bmh", font_scale=3)
         colors = ['dimgray', 'red', 'black', 'darkred', 'darkgoldenrod', 'royalblue', 'rebeccapurple', 'saddlebrown', 'darkslategray', 'darkorange', 'steelblue', 'lightcoral']
         plt.figure(figsize=(7,5), dpi=300)
@@ -206,7 +210,7 @@ def run_basis_pursuit_benchmark(p, n, k):
         plt.gca().invert_xaxis()
         plt.xlabel(r'$\textbf{suboptimality gap}$')
         # plt.ylabel(r'$\rho_k$')
-        plt.legend(fontsize=18, loc='upper left')
+        plt.legend(fontsize=18, loc='upper right')
         plt.tight_layout()
         fname = f"rho_fhist_basis_pursuit_p{p}_n{n}_k{k}.pdf"
         plt.savefig(fname, format='pdf', bbox_inches='tight')
@@ -223,7 +227,7 @@ def run_basis_pursuit_benchmark(p, n, k):
         plt.yscale('log')
         plt.xlabel(r'$\textbf{n. iterations}$')
         plt.ylabel(r'$\rho_k$')
-        plt.legend(fontsize=18, loc='upper right')
+        plt.legend(fontsize=18, loc='upper left')
         plt.tight_layout()
         fname = f"rho_iter_basis_pursuit_p{p}_n{n}_k{k}.pdf"
         plt.savefig(fname, format='pdf', bbox_inches='tight')
@@ -242,14 +246,14 @@ def run_basis_pursuit_benchmark(p, n, k):
         plt.gca().invert_xaxis()
         plt.xlabel(r'$\textbf{total infeas}$')
         # plt.ylabel(r'$\rho_k$')
-        plt.legend(fontsize=18, loc='upper left')
+        plt.legend(fontsize=18, loc='upper right')
         plt.tight_layout()
         fname = f"rho_totinf_basis_pursuit_p{p}_n{n}_k{k}.pdf"
         plt.savefig(fname, format='pdf', bbox_inches='tight')
         plt.close()
     else:
         setup_matplotlib()
-        plt.figure(figsize=(7,5), dpi=300)
+        fig, ax = plt.subplots(figsize=(7,5), dpi=300)
         for idx, (grad_evals, tot_inf, legend) in enumerate(zip(grad_evals_results_0, feas_meas_results, legends)):
             if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
                 label = None
@@ -266,8 +270,7 @@ def run_basis_pursuit_benchmark(p, n, k):
         plt.xlabel(r'$\textbf{grad evals}$')
         plt.ylabel(r'$\textbf{total infeas}$')
         if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
-            plt.legend(fontsize=18, loc='upper right')
-        ax = plt.gca()
+            plt.legend(fontsize=18, loc='lower left')
         formatter = mticker.ScalarFormatter(useMathText=True)
         formatter.set_powerlimits((0, 0))
         ax.xaxis.set_major_formatter(formatter)
@@ -280,7 +283,7 @@ def run_basis_pursuit_benchmark(p, n, k):
         plt.savefig(fname, format='pdf', bbox_inches='tight')
         plt.close()
 
-        plt.figure(figsize=(7,5), dpi=300)
+        fig, ax = plt.subplots(figsize=(7,5), dpi=300)
         for idx, (grad_evals, fx_minus_fxstar, legend) in enumerate(zip(grad_evals_results, f_hist_results, legends)):
             if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
                 label = None
@@ -298,9 +301,8 @@ def run_basis_pursuit_benchmark(p, n, k):
             plt.xlabel(r'$\textbf{grad evals}$')
         plt.ylabel(r'$\frac{|f_1(x^k) - f_1^\star|}{|f_1(x^0) - f_1^\star|}$')
         if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
-            plt.legend(fontsize=18, loc='upper right')
+            plt.legend(fontsize=18, loc='lower left')
             plt.title(rf'$p = {p}, n = {n}$')
-        ax = plt.gca()
         formatter = mticker.ScalarFormatter(useMathText=True)
         formatter.set_powerlimits((0, 0))
         ax.xaxis.set_major_formatter(formatter)
@@ -325,10 +327,11 @@ def run_basis_pursuit_benchmark(p, n, k):
                                     )
                 handles.append(handle)
             ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends)//2)
+            # ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends))
             ax_leg.axis('off')
             # plt.tight_layout()
             fname_leg = f"legend_pb_0.pdf"
             plt.savefig(fname_leg, format='pdf', bbox_inches='tight')
             plt.close(fig_leg)
 
-run_basis_pursuit_benchmark(400, 1024, 10)
+run_basis_pursuit_benchmark(200, 512, 10)

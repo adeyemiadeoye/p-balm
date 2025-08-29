@@ -80,8 +80,8 @@ def compare_alm_algs(prob_name, f_star=None):
     g0 = g(x0)
     mu0 = jnp.array(rng.standard_normal(g0.shape))
 
-    # tol = 1e-5
-    tol = 1e-15
+    tol = 1e-5
+    # tol = 1e-15
 
     if tol < 1e-5:
         max_iter = 50
@@ -129,8 +129,10 @@ def compare_alm_algs(prob_name, f_star=None):
             alpha_vals_alm = [12]
             xi_vals_alm = [10]
         else:
-            alpha_vals_alm = [4, 6, 9, 12]
-            xi_vals_alm = [2, 4, 7, 10]
+            # alpha_vals_alm = [4, 6, 9, 12]
+            # xi_vals_alm = [2, 4, 7, 10]
+            alpha_vals_alm = [4, 12]
+            xi_vals_alm = [4, 10]
     else:
         alpha_vals_alm = [12]
         xi_vals_alm = [10]
@@ -278,18 +280,18 @@ def compare_alm_algs(prob_name, f_star=None):
     if prob_name == "AUG3D" and tol < 1e-5:
         setup_matplotlib(font_scale=3, grid=False)
         colors = ['dimgray', 'red', 'black', 'darkred', 'darkgoldenrod', 'royalblue', 'rebeccapurple', 'saddlebrown', 'darkslategray', 'darkorange', 'steelblue', 'lightcoral']
-        plt.figure(figsize=(7,5), dpi=300)
+        fig, ax = plt.subplots(figsize=(7,5), dpi=300)
         for idx, (nu_hist, tot_inf, legend) in enumerate(zip(nu_hist_list, feas_meas_nu, legends_nu_0)):
             tot_inf = safe_for_plot(tot_inf)
-            plt.plot(tot_inf[1:], nu_hist[1:], label=legend,
-                     marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
-                     color=colors[idx % len(colors)],
-                     linestyle=linestyles[idx % len(linestyles)],
-                     markersize=marker_size
-                     )
+            ax.plot(tot_inf[1:], nu_hist[1:], label=legend,
+                        marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
+                        color=colors[idx % len(colors)],
+                        linestyle=linestyles[idx % len(linestyles)],
+                        markersize=marker_size
+                    )
         plt.xscale('log')
         plt.yscale('log')
-        plt.gca().invert_xaxis()
+        ax.invert_xaxis()
         # plt.ylabel(r'$\nu_k$')
         plt.xlabel(r'$\textbf{total infeas}$')
         plt.legend(fontsize=18, loc='lower right')
@@ -299,31 +301,31 @@ def compare_alm_algs(prob_name, f_star=None):
         plt.close()
 
 
-        plt.figure(figsize=(7,5), dpi=300)
+        fig, ax = plt.subplots(figsize=(7,5), dpi=300)
         for idx, (nu_hist, fx_minus_fxstar, legend) in enumerate(zip(nu_hist_list, f_hist_nu, legends_nu_0)):
             fx_minus_fxstar = safe_for_plot(fx_minus_fxstar)
-            plt.plot(np.abs(fx_minus_fxstar)/np.abs(f0_f_star), nu_hist, label=legend,
+            ax.plot(np.abs(fx_minus_fxstar)/np.abs(f0_f_star), nu_hist, label=legend,
                      marker=markers[idx % len(markers)], markevery=0.1, markerfacecolor='none',
                      color=colors[idx % len(colors)],
                      linestyle=linestyles[idx % len(linestyles)],
                      markersize=marker_size
                      )
-        plt.xscale('log')
-        plt.yscale('log')
-        plt.gca().invert_xaxis()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.invert_xaxis()
         # plt.xlabel(r'$\nu_k$')
-        plt.xlabel(r'$|f_1(x^k) - f_1^\star|/|f_1(x^0) - f_1^\star|$')
+        ax.set_xlabel(r'$|f_1(x^k) - f_1^\star|/|f_1(x^0) - f_1^\star|$')
         # plt.ylabel(r'$\rho_k$')
-        plt.legend(fontsize=18, loc='lower right')
+        ax.legend(fontsize=18, loc='lower right')
         plt.tight_layout()
         fname = f"nu_fhist_{prob_name}_phi_{phi_strategy}.pdf"
         plt.savefig(fname, format='pdf', bbox_inches='tight')
         plt.close()
 
-        plt.figure(figsize=(7,5), dpi=300)
+        fig, ax = plt.subplots(figsize=(7,5), dpi=300)
         # sel = [1,4,5]
         for idx, (grad_evals, nu_hist, legend) in enumerate(zip(grad_evals_nu, nu_hist_list, legends_nu_0)):
-            plt.plot(nu_hist, label=legend, marker=markers[idx % len(markers)],
+            ax.plot(nu_hist, label=legend, marker=markers[idx % len(markers)],
                      markevery=0.1, markerfacecolor='none',
                      color=colors[idx % len(colors)],
                      linestyle=linestyles[idx % len(linestyles)],
@@ -339,7 +341,7 @@ def compare_alm_algs(prob_name, f_star=None):
         plt.close()
     else:
         setup_matplotlib()
-        plt.figure(figsize=(7,5), dpi=300)
+        fig, ax = plt.subplots(figsize=(7,5), dpi=300)
         for idx, (grad_evals, tot_inf, legend) in enumerate(zip(grad_evals_results, feas_meas_results, legends)):
             tot_inf = safe_for_plot(tot_inf)
             if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
@@ -363,7 +365,6 @@ def compare_alm_algs(prob_name, f_star=None):
         # plt.title(rf'\texttt{{{prob_name}}} ($\kappa(Q)=\textrm{{\textbf{{{cond_Q:.2E}}}}}$)')
         if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
             plt.legend(fontsize=18, loc='lower left')
-        ax = plt.gca()
         formatter = mticker.ScalarFormatter(useMathText=True)
         formatter.set_powerlimits((0, 0))
         ax.xaxis.set_major_formatter(formatter)
@@ -373,7 +374,7 @@ def compare_alm_algs(prob_name, f_star=None):
         plt.savefig(fname, format='pdf', bbox_inches='tight')
         plt.close()
 
-        plt.figure(figsize=(7,5), dpi=300)
+        fig, ax = plt.subplots(figsize=(7,5), dpi=300)
         for idx, (grad_evals, fx_minus_fxstar, legend) in enumerate(zip(grad_evals_results, f_hist_results, legends)):
             if len(alpha_vals_alm) > 1 or len(xi_vals_alm) > 1:
                 label = None
@@ -394,7 +395,6 @@ def compare_alm_algs(prob_name, f_star=None):
         plt.title(rf'\texttt{{{prob_name}}} ($\kappa(Q)=\textrm{{\textbf{{{cond_Q:.2E}}}}}$)')
         if len(alpha_vals_alm) == 1 or len(xi_vals_alm) == 1:
             plt.legend(fontsize=18, loc='lower left')
-        ax = plt.gca()
         formatter = mticker.ScalarFormatter(useMathText=True)
         formatter.set_powerlimits((0, 0))
         ax.xaxis.set_major_formatter(formatter)
@@ -417,7 +417,8 @@ def compare_alm_algs(prob_name, f_star=None):
                                     markersize=marker_size
                                     )
                 handles.append(handle)
-            ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends)//2)
+            # ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends)//2)
+            ax_leg.legend(handles=handles, labels=legends, fontsize=14, loc='center', ncol=len(legends))
             ax_leg.axis('off')
             # plt.tight_layout()
             fname_leg = f"legend_MM_0.pdf"
