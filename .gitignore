@@ -52,7 +52,6 @@ MANIFEST
 .venv*/
 .conda*/
 .python-version
-tests/saved_models/fashion_mnist_model.pkl
 
 # PDF files
 *.pdf
