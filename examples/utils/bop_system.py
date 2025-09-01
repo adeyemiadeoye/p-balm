@@ -7,10 +7,10 @@ import matplotlib.path as mpath
 from plotting import setup_matplotlib
 
 
-# Ball-on-Plate system encapsulating dynamics, constraints and helper maps.
+# Ball-on-Plate system: dynamics,etc
 class BOPSystem:
 
-    def __init__(self):
+    def __init__(self, init_state=None):
         # phy constants
         self.g0 = 9.80665
         self.dt = 0.25
@@ -23,25 +23,29 @@ class BOPSystem:
 
         m = 0.05
         r = 0.01
-        Ib = (2.0 / 5.0) * m * r**2
-        self.c_b = m / (m + Ib / r**2) # = 5/7 for solid sphere (as in paper)
+        Ib = (2.0/5.0)*m*r**2
+        self.c_b = m/(m+Ib/r**2) # = 5/7 for solid sphere (as in paper)
 
         # cost weights
         self.Q_pos = jnp.diag(jnp.array([10.0, 0.05, 0.05, 0.05, 10.0, 0.05, 0.05, 0.05]))
-        self.R_u = 10.0 * jnp.eye(2)
-        self.T_off = 1e5 * jnp.eye(2)
+        self.R_u = 10.0*jnp.eye(2)
+        self.T_off = 1e5*jnp.eye(2)
 
         self.y_ref = jnp.array([1.0, -0.8])
 
         # initial state
-        # s_NW:
-        # self.x0 = jnp.array([-0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-
-        # s_SW:
-        self.x0 = jnp.array([-0.1, 0.0, 0.0, 0.0, 1, 0.0, 0.0, 0.0])
-
-        # s_NE:
-        # self.x0 = jnp.array([-0.18, 0.0, 0.0, 0.0, -0.6, 0.0, 0.0, 0.0])
+        self.init_state = init_state
+        if self.init_state is not None:
+            if self.init_state == "s_NW":
+                self.x0 = jnp.array([-0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+            elif self.init_state == "s_NE":
+                self.x0 = jnp.array([-0.1, 0.0, 0.0, 0.0, 1, 0.0, 0.0, 0.0])
+            elif self.init_state == "s_SW":
+                self.x0 = jnp.array([-0.18, 0.0, 0.0, 0.0, -0.6, 0.0, 0.0, 0.0])
+            else:
+                raise ValueError(f"Unknown init_state {self.init_state}")
+        else:
+            self.x0 = jnp.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
         # actuation limits
         self.u_max = 0.5
@@ -50,10 +54,8 @@ class BOPSystem:
         self.vel_box = 0.4
         self.ang_box = jnp.pi/4
 
-        # per-state lower/upper bounds (length state_dim). --> -inf/inf when unset.
         s_low = -jnp.inf * jnp.ones(self.state_dim)
         s_high = jnp.inf * jnp.ones(self.state_dim)
-        # velocity indices 1 and 5, angles 2 and 6 (0-based)
         s_low = s_low.at[1].set(-self.vel_box); s_high = s_high.at[1].set(self.vel_box)
         s_low = s_low.at[2].set(-self.ang_box); s_high = s_high.at[2].set(self.ang_box)
         s_low = s_low.at[5].set(-self.vel_box); s_high = s_high.at[5].set(self.vel_box)
@@ -68,7 +70,7 @@ class BOPSystem:
         # just for plotting..
         self.pos_plot_box = 1.5
 
-        # output set Y = E1 ∪ E2 (two ellipses)
+        # output set Y = E1 ∪ E2 (ellipses)
         self.P1 = jnp.array([[16.0, 0.0], [0.0, 0.5]])
         self.P2 = jnp.array([[5.8551, 7.3707], [7.3707, 10.6449]])
 
@@ -133,7 +135,7 @@ class BOPSystem:
     def output(self, x):
         return jnp.array([x[0], x[4]])
 
-    def plot_results(self, X, U, YS, mode, xi=None, alpha=None):
+    def plot_results(self, X, U, YS, mode, xi=None, alpha=None, name_append=None):
         setup_matplotlib(font_scale=3.5)
         colors = ['dimgray', 'red', 'black', 'darkred', 'darkgoldenrod', 'royalblue', 'rebeccapurple', 'saddlebrown',
                   'darkslategray', 'darkorange', 'steelblue', 'lightcoral']
@@ -165,6 +167,8 @@ class BOPSystem:
                 suff = "star_"+f"{alpha}"
             else:
                 suff = f"{alpha}"
+        if name_append:
+            suff += f"_{name_append}"
         plt.figure(figsize=(7,6), dpi=300)
         plt.contour(Xg, Yg, Fgrid, levels=[0.0], colors='black')
         plt.plot(y_traj[:, 0], y_traj[:, 1], label=r"$y(t)$", marker=cut_star, markevery=0.02,

@@ -4,8 +4,7 @@ import jax
 from jax import grad, jacfwd
 import jax.numpy as jnp
 import proxop
-import pbalm
-from .inner_solvers.inner_solvers import pyscsopt_minimize, PaProblem, phase_I_optim, jaxopt_minimize
+from .inner_solvers.inner_solvers import PaProblem, phase_I_optim
 import time
 
 class GradEvalCounter:
@@ -83,7 +82,7 @@ class Solution:
         self.max_runtime = max_runtime * 3600 if max_runtime is not None else 24.0 * 3600
         self.total_runtime = None
         self.solve_runtime = None
-        self.patience = patience
+        self.patience = patience # THIS is a future feature
         self.feas_reset_interval = feas_reset_interval
         self.reset_x0 = x0
         self.no_reset = no_reset
@@ -128,20 +127,8 @@ class Solution:
         if self.problem.h is None and self.problem.g is None:
             if self.verbosity > 0:
                 print("Solving problem without constraints")
-            if self.inner_solver == "PANOC":
-                pa_prob = PaProblem(self.problem.f, self.x0, reg=self.problem.reg, lbda=self.problem.reg_lbda, solver_opts=self.pa_solver_opts, direction=self.pa_direction, tol=self.tol, grad_fx=self.problem.f_grad if not self.problem.jittable else jax.jit(self.problem.f_grad), jittable=self.problem.jittable, Lip_grad_est=self.Lip_grad_est)
-                x_opt, _, cnt_grad_f = pa_prob._run_pa_procedure()
-            elif self.inner_solver in ["ProxLQNSCORE", "ProxGradient"]:
-                res = pyscsopt_minimize(self.x0, self.problem.f, self.problem.reg, lbda=self.problem.reg_lbda,
-                                        algo=self.inner_solver, grad_fx=self.problem.f_grad if not self.problem.jittable else jax.jit(self.problem.f_grad),
-                                        tol=self.tol, verbose=self.verbosity, max_iter=self.max_iter, jittable=self.problem.jittable)
-                x_opt = res.x
-            elif self.inner_solver == "JAXOPT":
-                sol = jaxopt_minimize(self.problem.f, self.x0, reg=self.problem.reg, lbda=self.problem.reg_lbda, tol=self.tol, max_iter=self.max_iter,
-                                        grad_fx=self.problem.f_grad if not self.problem.jittable else jax.jit(self.problem.f_grad), jittable=self.problem.jittable, Lip_grad_est=self.Lip_grad_est)
-                x_opt = sol.params
-            else:
-                raise ValueError(f"Unknown inner solver: {self.inner_solver}")
+            pa_prob = PaProblem(self.problem.f, self.x0, reg=self.problem.reg, lbda=self.problem.reg_lbda, solver_opts=self.pa_solver_opts, direction=self.pa_direction, tol=self.tol, grad_fx=self.problem.f_grad if not self.problem.jittable else jax.jit(self.problem.f_grad), jittable=self.problem.jittable, Lip_grad_est=self.Lip_grad_est)
+            x_opt, _, cnt_grad_f = pa_prob._run_pa_procedure()
             self.x = x_opt
             self.total_runtime = time.time() - total_start_time
             self.solve_runtime = self.total_runtime
@@ -390,7 +377,6 @@ class Solution:
             if self.use_proximal:
                 stopping_terms = jnp.concatenate([stopping_terms, jnp.array([prox_term_i])])
 
-            # violations = (g_x < -self.tol) & ~jnp.isclose(mu_new, 0) if self.problem.g else jnp.array([])
             eps_kkt_res = jnp.max(stopping_terms[1:])
             f_x = self.problem.f(x)
             self.kkt_res.append(eps_kkt_res)
@@ -433,7 +419,6 @@ class Solution:
                     self.solve_status = "PatienceExceeded"
                     break
 
-            # if ((~jnp.any(violations) if self.problem.g else True) and eps_kkt_res <= self.tol and (not self.use_proximal or prox_term_i < jnp.maximum(self.tol*0.01, 1e-12))):
             if (eps_kkt_res <= self.tol):
                 if self.verbosity > 0:
                     print(
@@ -573,21 +558,9 @@ class Solution:
         else:
             grad_fx = dL_aug if not self.problem.jittable else jax.jit(dL_aug)
         
-        if self.inner_solver == "PANOC":
-            pa_prob = PaProblem(L_aug, x0, reg=self.problem.reg, lbda=self.problem.reg_lbda, solver_opts=self.pa_solver_opts, tol=self.fp_tol,
-                                direction=self.pa_direction, grad_fx=grad_fx, jittable=self.problem.jittable, Lip_grad_est=Lip_grad_est)
-            x_opt, _, cnt_grad_f = pa_prob._run_pa_procedure()
-            # cnt_grad_f = grad_fx.count if self.use_autodiff_alm else 0
-        elif self.inner_solver in ["ProxLQNSCORE", "ProxGradient"]:
-            res = pyscsopt_minimize(x0, L_aug, self.problem.reg, lbda=self.problem.reg_lbda, algo=self.inner_solver,
-                                    grad_fx=grad_fx, tol=self.fp_tol, jittable=self.problem.jittable)
-            x_opt = res.x
-            cnt_grad_f = grad_fx.count if self.use_autodiff_alm else 0
-        elif self.inner_solver == "JAXOPT":
-            sol = jaxopt_minimize(L_aug, x0, reg=self.problem.reg, lbda=self.problem.reg_lbda, tol=self.fp_tol, max_iter=self.max_iter,
-                                    grad_fx=grad_fx, jittable=self.problem.jittable, Lip_grad_est=Lip_grad_est)
-            x_opt = sol.params
-            cnt_grad_f = grad_fx.count if self.use_autodiff_alm else 0
+        pa_prob = PaProblem(L_aug, x0, reg=self.problem.reg, lbda=self.problem.reg_lbda, solver_opts=self.pa_solver_opts, tol=self.fp_tol,
+                            direction=self.pa_direction, grad_fx=grad_fx, jittable=self.problem.jittable, Lip_grad_est=Lip_grad_est)
+        x_opt, _, cnt_grad_f = pa_prob._run_pa_procedure()
         return x_opt, cnt_grad_f
 
     def _minimize_prox_L_aug(self, x0, x_prev, lbda, mu, rho, nu, gamma_k, Lip_grad_est=None):
@@ -606,22 +579,10 @@ class Solution:
         else:
             grad_fx = dprox_L_aug if not self.problem.jittable else jax.jit(dprox_L_aug)
         
-        if self.inner_solver == "PANOC":
-            pa_prob = PaProblem(prox_L_aug, x0, reg=self.problem.reg, lbda=self.problem.reg_lbda,
-                                solver_opts=self.pa_solver_opts, tol=self.fp_tol, direction=self.pa_direction,
-                                grad_fx=grad_fx, jittable=self.problem.jittable, Lip_grad_est=Lip_grad_est)
-            x_opt, _, cnt_grad_f = pa_prob._run_pa_procedure()
-            # cnt_grad_f = grad_fx.count if self.use_autodiff_alm else 0
-        elif self.inner_solver in ["ProxLQNSCORE", "ProxGradient"]:
-            res = pyscsopt_minimize(x0, prox_L_aug, self.problem.reg, lbda=self.problem.reg_lbda, algo=self.inner_solver,
-                                    grad_fx=grad_fx, tol=self.fp_tol, jittable=self.problem.jittable)
-            x_opt = res.x
-            cnt_grad_f = grad_fx.count if self.use_autodiff_alm else 0
-        elif self.inner_solver == "JAXOPT":
-            sol = jaxopt_minimize(prox_L_aug, x0, reg=self.problem.reg, lbda=self.problem.reg_lbda, tol=self.fp_tol, max_iter=self.max_iter,
-                                    grad_fx=grad_fx, jittable=self.problem.jittable, Lip_grad_est=Lip_grad_est)
-            x_opt = sol.params
-            cnt_grad_f = grad_fx.count if self.use_autodiff_alm else 0
+        pa_prob = PaProblem(prox_L_aug, x0, reg=self.problem.reg, lbda=self.problem.reg_lbda,
+                            solver_opts=self.pa_solver_opts, tol=self.fp_tol, direction=self.pa_direction,
+                            grad_fx=grad_fx, jittable=self.problem.jittable, Lip_grad_est=Lip_grad_est)
+        x_opt, _, cnt_grad_f = pa_prob._run_pa_procedure()
         return x_opt, cnt_grad_f
 
 class Result:
@@ -641,19 +602,15 @@ class Result:
         self.grad_evals = grad_evals
 
 def solve(problem, x0, lbda0=None, mu0=None, rho0=1e-3, nu0=1e-3, use_proximal=True,
-            gamma0=1e-1, beta=0.5, alpha=3, delta=1e-6, xi1=1.0, xi2=1.0, tol=1e-6, fp_tol=None, max_iter=1000,
-          phase_I_tol=1e-7,
+            gamma0=1e-1, beta=0.5, alpha=3, delta=1e-6, xi1=1.0, xi2=1.0, tol=1e-6, fp_tol=None, max_iter=1000, phase_I_tol=1e-7,
             start_feas=True, inner_solver=None, pa_direction=None, pa_solver_opts=None, verbosity=1, max_runtime=24.0,
             phi_strategy="pow", patience=None, feas_reset_interval=None, uniform_pen=True, no_reset=False, Lip_grad_est=None, use_autodiff_alm=True, adaptive_fp_tol=False):
     if inner_solver is None:
         inner_solver = "PANOC"
     else:
         if inner_solver == "PANOC" and type(problem.reg) not in [proxop.multi.L1Norm, proxop.indicator.BoxConstraint, type(None)]:
-            print("PANOC solver is only available for L1, BoxConstraint and NoneType regularizers.\nSetting inner_solver to ProxLQNSCORE.")
-            inner_solver = "ProxLQNSCORE"
-        elif inner_solver == "ProxLQNSCORE" and (problem.reg is None or type(problem.reg) not in [proxop.multi.L1Norm, proxop.multi.L2Norm, proxop.indicator.BoxConstraint, pbalm.SGLPenalty]):
-            print("ProxLQNSCORE solver can only be used with regularizers.\nSetting inner_solver to PANOC.")
-            inner_solver = "PANOC"
+            print("PANOC solver is only available for L1, BoxConstraint and NoneType regularizers.")
+            raise ValueError("Incompatible regularizer for PANOC solver.")
             
     if problem.h is not None and lbda0 is None:
         h0 = problem.h(x0)

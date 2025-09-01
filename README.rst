@@ -1,25 +1,14 @@
 pbalm
 ======
 
-An Augmented Lagrangian Method for Solving Nonconvex Optimization with Equality and Inequality Constraints
+<p align="center">
+    <a style="text-decoration:none !important;" href="https://arxiv.org/abs/2309.01781" alt="arXiv" target="_blank"><img src="https://img.shields.io/badge/paper-arXiv-red" /></a>
+</p>
 
-pbalm is a Python package implementing an Augmented Lagrangian Method for solving nonconvex constrained optimization problems.
+This repository implements a proximal augmented Lagrangian method for solving nonconvex structured optimization problems as described in the paper [link to paper].
 
-Features:
-- Efficient algorithms for nonlinear constrained optimization
-- Modular and extensible solver design
+To run the examples, first install in editable mode:
 
-Installation
-------------
-Install via pip:
+    pip install -e .
 
-    pip install pbalm
-
-License
--------
-MIT License
-
-Author
-------
-Adeyemi Damilare Adeoye
 
