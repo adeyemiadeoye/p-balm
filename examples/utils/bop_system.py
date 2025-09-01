@@ -138,7 +138,7 @@ class BOPSystem:
     def plot_results(self, X, U, YS, mode, xi=None, alpha=None, name_append=None):
         setup_matplotlib(font_scale=3.5)
         colors = ['dimgray', 'red', 'black', 'darkred', 'darkgoldenrod', 'royalblue', 'rebeccapurple', 'saddlebrown',
-                  'darkslategray', 'darkorange', 'steelblue', 'lightcoral']
+                    'darkslategray', 'darkorange', 'steelblue', 'lightcoral']
         linestyles = [
             (5, (10, 3)),
             (0, (5, 1)),
@@ -172,12 +172,12 @@ class BOPSystem:
         plt.figure(figsize=(7,6), dpi=300)
         plt.contour(Xg, Yg, Fgrid, levels=[0.0], colors='black')
         plt.plot(y_traj[:, 0], y_traj[:, 1], label=r"$y(t)$", marker=cut_star, markevery=0.02,
-                 color=colors[5], markersize=marker_size+1, markerfacecolor='white')
+                    color=colors[5], markersize=marker_size+1, markerfacecolor='white')
         plt.plot(ys_traj[:,0], ys_traj[:,1],  label=r"$y_s(t)$", color=colors[0], linestyle=linestyles[1],
-                 marker=markers[0], markevery=0.02, markerfacecolor='none', markersize=marker_size)
+                    marker=markers[0], markevery=0.02, markerfacecolor='none', markersize=marker_size)
         plt.plot(self.y_ref[0], self.y_ref[1], label=r"$y_r$", marker=markers[7], color=colors[3], linestyle='None', markersize=marker_size+1)
         plt.plot(self.x0[0], self.x0[4], label=r"$y(0)$", marker=markers[10], color=colors[4], linestyle='None',
-                 markersize=marker_size+1)
+                    markersize=marker_size+1)
         plt.xlabel(r"$y_1$"+r" $\bf{[m]}$"); plt.ylabel(r"$y_2$"+r" $\bf{[m]}$")
         plt.legend(fontsize=18)
         plt.gca()
