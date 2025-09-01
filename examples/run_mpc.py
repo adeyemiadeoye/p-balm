@@ -15,6 +15,6 @@ alpha = 12
 init_state = "s_SW"
 system = BOPSystem(init_state=init_state)
 algo = "pbalm"
-X, U, YS = solve_mpc(system, mode=algo, xi=xi, alpha=alpha, sim_steps=48, verbose=True)
+X, U, YS = solve_mpc(system, algo=algo, xi=xi, alpha=alpha, sim_steps=48, verbose=True)
 if hasattr(system, 'plot_results') and callable(system.plot_results):
     system.plot_results(X, U, YS, algo, xi=xi, alpha=alpha)

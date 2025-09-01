@@ -1,7 +1,3 @@
-from jaxopt import projection
-from jaxopt import prox
-from jaxopt import ProximalGradient, ScipyMinimize, ProjectedGradient
-
 import proxop
 import numpy as np
 import jax.numpy as jnp
@@ -10,38 +6,6 @@ import pbalm
 np.NaN = np.nan
 import alpaqa as pa
 import jax
-
-
-def jaxopt_minimize(f, x0, reg=None, lbda=None, tol=1e-9, max_iter=2000, grad_fx=None, jittable=False, Lip_grad_est=None):
-        low = reg.low if type(reg) == proxop.indicator.BoxConstraint else -jnp.inf
-        high = reg.high if type(reg) == proxop.indicator.BoxConstraint else jnp.inf
-        l1_reg = lbda if lbda is not None else None
-
-        stepsize = -1 if Lip_grad_est is None else 0.95/Lip_grad_est
-
-
-        def fun(x):
-            return f(x) if grad_fx is None else (f(x), grad_fx(x))
-
-        if type(reg) == proxop.indicator.BoxConstraint:
-            hyperparams_proj = (low, high)
-
-            proj_op = projection.projection_box
-            solver = ProjectedGradient(fun=fun, projection=proj_op, tol=tol, stepsize=stepsize, maxiter=max_iter, acceleration=True, jit=jittable, value_and_grad=True if grad_fx is not None else False)
-            sol = solver.run(x0, hyperparams_proj=hyperparams_proj)
-
-        elif type(reg) == proxop.multi.L1Norm:
-                prox_op = prox.prox_lasso
-                hyperparams_prox = l1_reg
-                solver = ProximalGradient(fun=fun, prox=prox_op, tol=tol, stepsize=stepsize, maxiter=max_iter, acceleration=True, jit=jittable, value_and_grad=True if grad_fx is not None else False)
-                sol = solver.run(x0, hyperparams_prox=hyperparams_prox)
-        elif reg == None:
-            solver = ScipyMinimize(fun=fun, method="L-BFGS-B", tol=tol, maxiter=max_iter, jit=jittable, value_and_grad=True if grad_fx is not None else False, options={'maxcor': 20})
-            sol = solver.run(x0)
-        else:
-            raise ValueError(f"Unsupported regularizer type: {type(reg)}. Supported types are BoxConstraint and L1Norm.")
-        
-        return sol
 
 class PaProblem(pa.BoxConstrProblem):
     def __init__(self, f, x0, reg=None, lbda=None, solver_opts=None, tol=1e-9, max_iter=2000, direction=None, grad_fx=None, jittable=True, Lip_grad_est=None):

@@ -4,10 +4,10 @@ import jax.scipy.linalg as jsp_linalg
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
-from plotting import setup_matplotlib
+from utils.plotting import setup_matplotlib
 
 
-# Ball-on-Plate system: dynamics,etc
+# ball-on-plate system: dynamics,etc
 class BOPSystem:
 
     def __init__(self, init_state=None):

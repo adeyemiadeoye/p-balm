@@ -13,9 +13,9 @@ def setup_matplotlib(font_scale=2.5, style_name="science", grid=True):
         matplotlib.rcParams.update({'axes.grid': False, 'legend.fancybox': True, 'legend.frameon': True, 'legend.numpoints': 1})
 
     sns.set_context("paper", font_scale=font_scale,
-                  rc={"lines.linewidth": 3,
-                      "mathtext.fontset": "stix",
-                  })
+                    rc={"lines.linewidth": 3,
+                    "mathtext.fontset": "stix",
+                    })
     
     matplotlib.rcParams['text.usetex'] = True
     matplotlib.rcParams['text.latex.preamble'] = (
