@@ -9,23 +9,55 @@ version_scheme = "no-guess-dev"
 name = "pbalm"
 version = "0.1.1"
 description = "Proximal augmented Lagrangian method for nonconvex structured optimization."
+readme = { file = "README.rst", content-type = "text/x-rst; charset=UTF-8" }
 authors = [
-  { name = "Adeyemi Damilare Adeoye" }
+  { name = "Adeyemi Damilare Adeoye", email = "adeyemi.adeoye@imtlucca.it" },
+  { name = "Alberto Bemporad", email = "alberto.bemporad@imtlucca.it" }
 ]
 license = { file = "../LICENSE" }
-readme = "README.rst"
 keywords = ["optimization", "nonlinear optimization", "constrained optimization", "augmented Lagrangian"]
 requires-python = ">=3.8"
-dependencies = [
-  "numpy",
-  "jax",
-  "jaxlib",
-  "proxop"
-]
+platforms = ["any"]
+url = "https://github.com/adeyemiadeoye/p-balm"
+project_urls = { "Documentation" = "https://github.com/adeyemiadeoye/p-balm" }
 classifiers = [
-    "Intended Audience :: Science/Research",
-    "Operating System :: OS Independent",
-    "Topic :: Scientific/Engineering",
-    "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
 ]
+dependencies = [
+  "numpy>=2.1.3",
+  "jax>=0.7.0",
+  "jaxlib>=0.7.0",
+  "proxop>=1.0.6"
+]
+
+[project.optional-dependencies]
+testing = [
+  "setuptools",
+  "pytest",
+  "pytest-cov"
+]
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests"]
+
+[tool.pytest.ini_options]
+addopts = "--cov pbalm --cov-report term-missing --verbose"
+norecursedirs = ["dist", "build", ".tox"]
+testpaths = ["tests"]
+
+[tool.flake8]
+max_line_length = 88
+extend_ignore = ["E203", "W503"]
+exclude = [" .tox", "build", "dist", ".eggs"]

@@ -43,7 +43,7 @@ class Problem:
             self.g_grad.reset()
 
 class Solution:
-    def __init__(self, problem, x0, lbda0, mu0, rho0, nu0, gamma0, use_proximal=True, beta=0.5, alpha=2.0, delta=1.0, xi1=1.0, xi2=1.0, tol=1e-6, fp_tol=None, max_iter=1000, phase_I_tol=1e-7, start_feas=True, inner_solver="PANOC", pa_solver_opts=None, pa_direction=None, verbosity=1, max_runtime=24.0, phi_strategy="pow", patience=None, feas_reset_interval=None, uniform_pen=False, no_reset=False, Lip_grad_est=None, use_autodiff_alm=True, adaptive_fp_tol=True):
+    def __init__(self, problem, x0, lbda0, mu0, rho0, nu0, gamma0, use_proximal=True, beta=0.5, alpha=2.0, delta=1.0, xi1=1.0, xi2=1.0, tol=1e-6, fp_tol=None, max_iter=1000, phase_I_tol=1e-7, start_feas=True, inner_solver="PANOC", pa_solver_opts=None, pa_direction=None, verbosity=1, max_runtime=24.0, phi_strategy="pow", feas_reset_interval=None, uniform_pen=False, no_reset=False, Lip_grad_est=None, use_autodiff_alm=True, adaptive_fp_tol=True):
         self.problem = problem
         self.x0 = x0
         self.lbda0 = lbda0
@@ -82,7 +82,6 @@ class Solution:
         self.max_runtime = max_runtime * 3600 if max_runtime is not None else 24.0 * 3600
         self.total_runtime = None
         self.solve_runtime = None
-        self.patience = patience # THIS is a future feature
         self.feas_reset_interval = feas_reset_interval
         self.reset_x0 = x0
         self.no_reset = no_reset
@@ -166,8 +165,6 @@ class Solution:
         
         best_f = None
         best_kkt = None
-        patience_counter = 0
-        patience_x = None
         grad_evals = 0
         if self.use_proximal:
             def L_aug(x):
@@ -236,11 +233,6 @@ class Solution:
                         f"{i:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
                 best_f = f_x
                 best_kkt = eps_kkt_res
-                patience_counter = 0
-
-            # store x at patience//2 if needed
-            if self.patience is not None and self.patience >= 2 and patience_counter == self.patience // 2:
-                patience_x = x.copy() if hasattr(x, 'copy') else jnp.array(x)
 
             L_aug_val = L_aug(x)
             if self.no_reset:
@@ -394,30 +386,6 @@ class Solution:
             if self.verbosity > 0 and ((i + 1) % int(20/self.verbosity) == 0 or (i + 1) == self.max_iter):
                 print(
                     f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {self.total_infeas[-1]:<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
-
-            # patience logic
-            current_f = f_x
-            current_kkt = eps_kkt_res
-            if self.patience is not None:
-                if (current_f > best_f) and (current_kkt > best_kkt):
-                    patience_counter += 1
-                else:
-                    if current_f < best_f:
-                        best_f = current_f
-                    if current_kkt < best_kkt:
-                        best_kkt = current_kkt
-                    patience_counter = 0
-                if patience_counter >= self.patience:
-                    if patience_x is not None:
-                        x = patience_x
-                        if self.verbosity > 0:
-                            print("-" * 80)
-                            print(f"Patience level {self.patience} reached: reverting to solution at patience//2 (iteration {i+1-self.patience//2}).")
-                    elif self.verbosity > 0:
-                        print("-" * 80)
-                        print(f"Patience level {self.patience} reached: objective and KKT residual both worsened for {self.patience} consecutive iterations.")
-                    self.solve_status = "PatienceExceeded"
-                    break
 
             if (eps_kkt_res <= self.tol):
                 if self.verbosity > 0:
@@ -604,7 +572,7 @@ class Result:
 def solve(problem, x0, lbda0=None, mu0=None, rho0=1e-3, nu0=1e-3, use_proximal=True,
             gamma0=1e-1, beta=0.5, alpha=3, delta=1e-6, xi1=1.0, xi2=1.0, tol=1e-6, fp_tol=None, max_iter=1000, phase_I_tol=1e-7,
             start_feas=True, inner_solver=None, pa_direction=None, pa_solver_opts=None, verbosity=1, max_runtime=24.0,
-            phi_strategy="pow", patience=None, feas_reset_interval=None, uniform_pen=True, no_reset=False, Lip_grad_est=None, use_autodiff_alm=True, adaptive_fp_tol=False):
+            phi_strategy="pow", feas_reset_interval=None, uniform_pen=True, no_reset=False, Lip_grad_est=None, use_autodiff_alm=True, adaptive_fp_tol=False):
     if inner_solver is None:
         inner_solver = "PANOC"
     else:
@@ -623,7 +591,7 @@ def solve(problem, x0, lbda0=None, mu0=None, rho0=1e-3, nu0=1e-3, use_proximal=T
     solution = Solution(problem, x0, lbda0, mu0, rho0, nu0, gamma0, use_proximal=use_proximal, beta=beta, alpha=alpha, delta=delta,
                         xi1=xi1, xi2=xi2, tol=tol, fp_tol=fp_tol, max_iter=max_iter, phase_I_tol=phase_I_tol, start_feas=start_feas,
                         inner_solver=inner_solver, pa_direction=pa_direction, pa_solver_opts=pa_solver_opts, verbosity=verbosity,
-                        max_runtime=max_runtime, phi_strategy=phi_strategy, patience=patience, feas_reset_interval=feas_reset_interval,
+                        max_runtime=max_runtime, phi_strategy=phi_strategy, feas_reset_interval=feas_reset_interval,
                         uniform_pen=uniform_pen, no_reset=no_reset, Lip_grad_est=Lip_grad_est, use_autodiff_alm=use_autodiff_alm, adaptive_fp_tol=adaptive_fp_tol)
     solution.pbalm()
     res = Result(solution.x, solution.prox_grad_res, solution.kkt_res, solution.total_infeas, solution.f_hist, solution.rho_hist, solution.nu_hist, solution.gamma_hist, solution.prox_hist, solution.solve_status, solution.total_runtime, solution.solve_runtime, grad_evals=getattr(solution, 'grad_evals', None))

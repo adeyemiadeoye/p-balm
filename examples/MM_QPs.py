@@ -31,7 +31,7 @@ def safe_for_plot(arr, max_finite=1e10):
 
 def compare_alm_algs(prob_name, f_star=None):
 
-    # here I assume you have the compiled CUTEST problem in this dir
+    # here I assume you have the compiled MM problem in this dir
     # with the .so and OUTSDIF.d files
     mm_qps_dir = Path.home() / "opt" / "CUTEST" / "compiled_QP_MM"
 
