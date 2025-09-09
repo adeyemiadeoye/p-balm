@@ -11,4 +11,6 @@ To run the examples, first install `pbalm` in editable mode:
 
     pip install -e .
 
+Note: The MM example  requires Gurobi Optimizer. To run, you need to obtain a Gurobi license. You can download Gurobi from the [Gurobi website](https://www.gurobi.com/downloads/gurobi-software/) and follow the installation instructions. For academic users, you can request a free academic license from Gurobi.
 
+The Gurobi Optimizer is a registered trademark of Gurobi Optimization, LLC. We acknowledge the use of Gurobi in our research.
