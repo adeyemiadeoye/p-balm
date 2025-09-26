@@ -17,9 +17,6 @@ authors = [
 license = { file = "../LICENSE" }
 keywords = ["optimization", "nonlinear optimization", "constrained optimization", "augmented Lagrangian"]
 requires-python = ">=3.8"
-platforms = ["any"]
-url = "https://github.com/adeyemiadeoye/p-balm"
-project_urls = { "Documentation" = "https://github.com/adeyemiadeoye/p-balm" }
 classifiers = [
   "Intended Audience :: Science/Research",
   "Operating System :: OS Independent",

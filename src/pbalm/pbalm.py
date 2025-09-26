@@ -121,7 +121,7 @@ class Solution:
         total_start_time = time.time()
         start_time = time.time()
         warmup_end_time = None
-        self.grad_evals = [] if hasattr(self.problem, 'jittable') and self.problem.jittable else None
+        self.grad_evals = []
         last_grad_eval = 0
         if self.problem.h is None and self.problem.g is None:
             if self.verbosity > 0:
