@@ -28,10 +28,10 @@ where $f_1$ is smooth (possibly nonconvex), $f_2$ is possibly nonsmooth but prox
 
 ## Key Features
 
-- **Nonconvex optimization** — handles nonconvex objectives and constraints
-- **Composite objectives** — supports smooth + nonsmooth terms
-- **Flexible constraints** — both equality and inequality constraints
-- **JAX-powered** — automatic differentiation and JIT compilation
+- **Nonconvex optimization**: handles nonconvex objectives and constraints
+- **Composite objectives**: supports smooth + nonsmooth terms
+- **Flexible constraints**: both equality and inequality constraints
+- **JAX-powered**: automatic differentiation and JIT compilation
 
 ## Quick Example
 

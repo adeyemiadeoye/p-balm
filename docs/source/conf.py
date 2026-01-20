@@ -9,6 +9,8 @@ import re
 
 sys.path.insert(0, os.path.abspath('../../src'))
 
+master_doc = "index"
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -78,7 +80,7 @@ autodoc_default_options = {
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_book_theme'
-html_logo = "_static/pbalm_logo.svg"
+html_logo = "_static/pbalm_logo.png"
 html_favicon = "_static/pbalm_fav.svg"
 html_title = "pbalm"
 html_static_path = ['_static']
