@@ -1,0 +1,968 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>User Guide &#8212; pbalm</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'usage';</script>
+    <link rel="icon" href="_static/pbalm_fav.svg"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples/index.html" />
+    <link rel="prev" title="Quick Start Guide" href="quickstart.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+
+  <div class="bd-header-announcement container-fluid bd-header-announcement">
+    <div class="bd-header-announcement__content"><p style='font-family: Arial, sans-serif; font-style: italic; color:#27526A; background-color: #b1b1b1; border-radius: 5px;'>⚠️<a href='https://github.com/adeyemiadeoye/p-balm'>pbalm</a> is under active development, documentation, continuous integrations, and improvements!⚠️</p></div>
+  </div>
+
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">pbalm</p>
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/adeyemiadeoye/p-balm" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/pbalm/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/dw/sphinx-book-theme" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">User Guide</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/basis_pursuit.html">Basis Pursuit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/constrained_optimization.html">Constrained Optimization Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/sparse_regression.html">Sparse Regression</a></li>
+</ul>
+</li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/problem.html">Problem Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/solve.html">Solve Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/result.html">Result Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/inner_solvers.html">Inner Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/utils.html">Utilities</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/adeyemiadeoye/p-balm" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/adeyemiadeoye/p-balm/blob/main/docs/usage.rst?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/adeyemiadeoye/p-balm/issues/new?title=Issue%20on%20page%20%2Fusage.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/usage.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>User Guide</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-optimization-problems">Defining Optimization Problems</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-problem-class">The <code class="docutils literal notranslate"><span class="pre">Problem</span></code> Class</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#objective-function">Objective Function</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#constraints">Constraints</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regularization">Regularization</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#solving-problems">Solving Problems</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-solve-function">The <code class="docutils literal notranslate"><span class="pre">solve</span></code> Function</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-solver-parameters">Key Solver Parameters</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-results">Working with Results</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-result-class">The <code class="docutils literal notranslate"><span class="pre">Result</span></code> Class</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analyzing-convergence">Analyzing Convergence</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-features">Advanced Features</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#jit-compilation">JIT Compilation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-gradient">Custom Gradient</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#callback-function">Callback Function</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-inner-solver">Custom Inner Solver</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#structured-variables">Structured Variables</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tips-and-best-practices">Tips and Best Practices</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="user-guide">
+<h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this heading">#</a></h1>
+<p>This guide covers the detailed usage of <strong>pbalm</strong> for solving constrained optimization problems.</p>
+<section id="defining-optimization-problems">
+<h2>Defining Optimization Problems<a class="headerlink" href="#defining-optimization-problems" title="Permalink to this heading">#</a></h2>
+<section id="the-problem-class">
+<h3>The <code class="docutils literal notranslate"><span class="pre">Problem</span></code> Class<a class="headerlink" href="#the-problem-class" title="Permalink to this heading">#</a></h3>
+<p>The core of <strong>pbalm</strong> is the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class, which defines the optimization problem:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pbalm</span>
+
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span>
+    <span class="n">f1</span><span class="p">,</span>             <span class="c1"># Smooth objective function</span>
+    <span class="n">f2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>        <span class="c1"># Nonsmooth regularizer (optional)</span>
+    <span class="n">f2_lbda</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>    <span class="c1"># Regularization parameter (float or list)</span>
+    <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>         <span class="c1"># List of equality constraints</span>
+    <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>         <span class="c1"># List of inequality constraints</span>
+    <span class="n">f1_grad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>   <span class="c1"># Custom gradient of f1 (optional)</span>
+    <span class="n">jittable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="c1"># Enable JAX JIT compilation</span>
+    <span class="n">callback</span><span class="o">=</span><span class="kc">None</span>   <span class="c1"># Callback function (optional)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="objective-function">
+<h3>Objective Function<a class="headerlink" href="#objective-function" title="Permalink to this heading">#</a></h3>
+<p>The objective function must accept a JAX array and return a scalar:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">f1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>For best performance with JAX, avoid using NumPy functions directly; use <code class="docutils literal notranslate"><span class="pre">jax.numpy</span></code> instead.</p>
+</section>
+<section id="constraints">
+<h3>Constraints<a class="headerlink" href="#constraints" title="Permalink to this heading">#</a></h3>
+<p>Constraints are defined as lists of functions:</p>
+<p><strong>Equality constraints</strong> <span class="math notranslate nohighlight">\(h_i(x) = 0\)</span>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">h1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># x[0] + x[1] = 1</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">h2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span>  <span class="c1"># x[0] * x[1] = 0.5</span>
+
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">f1</span><span class="o">=</span><span class="n">f1</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="p">[</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">])</span>
+</pre></div>
+</div>
+<p><strong>Inequality constraints</strong> <span class="math notranslate nohighlight">\(g_i(x) \leq 0\)</span>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">g1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># x[0]^2 + x[1]^2 &lt;= 1</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">g2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># x[0] &gt;= 0</span>
+
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">f1</span><span class="o">=</span><span class="n">f1</span><span class="p">,</span> <span class="n">g</span><span class="o">=</span><span class="p">[</span><span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">])</span>
+</pre></div>
+</div>
+<p><strong>Both equality and inequality constraints</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">problem</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">f1</span><span class="o">=</span><span class="n">f1</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="p">[</span><span class="n">h1</span><span class="p">],</span> <span class="n">g</span><span class="o">=</span><span class="p">[</span><span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="regularization">
+<h3>Regularization<a class="headerlink" href="#regularization" title="Permalink to this heading">#</a></h3>
+<p>For composite objectives <span class="math notranslate nohighlight">\(f_1(x) + f_2(x)\)</span> where <span class="math notranslate nohighlight">\(f_2\)</span> is nonsmooth:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># L1 regularization: f_2(x) = lambda * ||x||_1</span>
+<span class="n">f2</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">L1Norm</span><span class="p">()</span>
+<span class="n">f2_lbda</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span>
+    <span class="n">f1</span><span class="o">=</span><span class="n">f1</span><span class="p">,</span>
+    <span class="n">h</span><span class="o">=</span><span class="p">[</span><span class="n">h1</span><span class="p">],</span>
+    <span class="n">f2</span><span class="o">=</span><span class="n">f2</span><span class="p">,</span>
+    <span class="n">f2_lbda</span><span class="o">=</span><span class="n">f2_lbda</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Supported regularizers</strong> from <code class="docutils literal notranslate"><span class="pre">pbalm</span></code> include:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pbalm.L1Norm(f2_lbda)</span></code>: L1 norm (induces sparsity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pbalm.NuclearNorm(f2_lbda,</span> <span class="pre">rows,</span> <span class="pre">cols)</span></code>: Nuclear norm (induces low-rank)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pbalm.Box(lower,</span> <span class="pre">upper)</span></code>: Box constraints (must use numpy arrays, e.g., <code class="docutils literal notranslate"><span class="pre">pbalm.Box(lower=np.asarray([0.1]),</span> <span class="pre">upper=np.asarray([1.0]))</span></code>).</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When using L1 regularization, <code class="docutils literal notranslate"><span class="pre">pbalm.L1Norm()</span></code> must be set as <code class="docutils literal notranslate"><span class="pre">f2</span></code>. If <code class="docutils literal notranslate"><span class="pre">f2_lbda</span></code> is however provided, its value is prioritized for the inner iterations. This is useful when you want to specify <code class="docutils literal notranslate"><span class="pre">f2_lbda</span></code> as a list (same length as the optimization variable) for element-wise L1 weights, or combine L1 with other regularizers like box constraints.</p>
+</div>
+</section>
+</section>
+<section id="solving-problems">
+<h2>Solving Problems<a class="headerlink" href="#solving-problems" title="Permalink to this heading">#</a></h2>
+<section id="the-solve-function">
+<h3>The <code class="docutils literal notranslate"><span class="pre">solve</span></code> Function<a class="headerlink" href="#the-solve-function" title="Permalink to this heading">#</a></h3>
+<p>Once a problem is defined, solve it using <code class="docutils literal notranslate"><span class="pre">pbalm.solve</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span>
+    <span class="n">problem</span><span class="p">,</span>           <span class="c1"># Problem instance</span>
+    <span class="n">x0</span><span class="p">,</span>                <span class="c1"># Initial point</span>
+    <span class="n">tol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>          <span class="c1"># Convergence tolerance</span>
+    <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>     <span class="c1"># Maximum outer iterations</span>
+    <span class="n">verbosity</span><span class="o">=</span><span class="mi">1</span>        <span class="c1"># Output level</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="key-solver-parameters">
+<h3>Key Solver Parameters<a class="headerlink" href="#key-solver-parameters" title="Permalink to this heading">#</a></h3>
+<p><strong>Basic parameters:</strong></p>
+<table class="table">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">x0</span></code></p></td>
+<td><p>Initial guess for decision variables (JAX array)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tol</span></code></p></td>
+<td><p>Convergence tolerance for KKT conditions</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_iter</span></code></p></td>
+<td><p>Maximum number of outer ALM iterations</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">verbosity</span></code></p></td>
+<td><p>Output level (0: silent, 1: normal)</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Proximal ALM parameters:</strong></p>
+<table class="table">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">use_proximal</span></code></p></td>
+<td><p>Enable proximal ALM (default: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gamma0</span></code></p></td>
+<td><p>Initial proximal parameter (default: <code class="docutils literal notranslate"><span class="pre">0.1</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">delta</span></code></p></td>
+<td><p>Proximal parameter update factor</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Penalty parameters:</strong></p>
+<table class="table">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rho0</span></code></p></td>
+<td><p>Initial penalty for equality constraints</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nu0</span></code></p></td>
+<td><p>Initial penalty for inequality constraints</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code></p></td>
+<td><p>Penalty growth exponent</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">beta</span></code></p></td>
+<td><p>Constraint satisfaction threshold</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Inner solver parameters:</strong></p>
+<table class="table">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_iter_inner</span></code></p></td>
+<td><p>Maximum iterations for inner solver</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fp_tol</span></code></p></td>
+<td><p>Fixed-point tolerance for inner solver</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">adaptive_fp_tol</span></code></p></td>
+<td><p>Adaptively decrease inner tolerance</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pa_solver_opts</span></code></p></td>
+<td><p>Options passed to PANOC solver</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pa_direction</span></code></p></td>
+<td><p>Direction method for PANOC</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Feasibility parameters:</strong></p>
+<table class="table">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start_feas</span></code></p></td>
+<td><p>Find feasible point first (default: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">phase_I_tol</span></code></p></td>
+<td><p>Tolerance for Phase I problem</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">no_reset</span></code></p></td>
+<td><p>Disable feasibility reset</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="working-with-results">
+<h2>Working with Results<a class="headerlink" href="#working-with-results" title="Permalink to this heading">#</a></h2>
+<section id="the-result-class">
+<h3>The <code class="docutils literal notranslate"><span class="pre">Result</span></code> Class<a class="headerlink" href="#the-result-class" title="Permalink to this heading">#</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">solve</span></code> function returns a <code class="docutils literal notranslate"><span class="pre">Result</span></code> object:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="n">x0</span><span class="p">)</span>
+
+<span class="c1"># Solution</span>
+<span class="n">x_opt</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span>
+
+<span class="c1"># Solver status</span>
+<span class="n">status</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">solve_status</span>
+<span class="c1"># Possible values: &#39;Converged&#39;, &#39;Stopped&#39;, &#39;MaxRuntimeExceeded&#39;, &#39;NaNOrInf&#39;</span>
+
+<span class="c1"># History</span>
+<span class="n">f_values</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">f_hist</span>           <span class="c1"># Objective values per iteration</span>
+<span class="n">infeas</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">total_infeas</span>       <span class="c1"># Constraint violation per iteration</span>
+<span class="n">prox_res</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">fp_res</span>    <span class="c1"># Fixed-point residual</span>
+
+<span class="c1"># Timing</span>
+<span class="n">total_time</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">total_runtime</span>  <span class="c1"># Total runtime in seconds</span>
+<span class="n">solve_time</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">solve_runtime</span>  <span class="c1"># Solving phase runtime</span>
+</pre></div>
+</div>
+</section>
+<section id="analyzing-convergence">
+<h3>Analyzing Convergence<a class="headerlink" href="#analyzing-convergence" title="Permalink to this heading">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="c1"># Plot objective value convergence</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">f_hist</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Objective value&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Objective Convergence&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">total_infeas</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>  <span class="c1"># Skip first value (if phase I was used)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Infeasibility&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Constraint Satisfaction&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="advanced-features">
+<h2>Advanced Features<a class="headerlink" href="#advanced-features" title="Permalink to this heading">#</a></h2>
+<section id="jit-compilation">
+<h3>JIT Compilation<a class="headerlink" href="#jit-compilation" title="Permalink to this heading">#</a></h3>
+<p>For better performance, enable JIT compilation with JAX-compatible functions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">problem</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span>
+    <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
+    <span class="n">h</span><span class="o">=</span><span class="p">[</span><span class="n">h</span><span class="p">],</span>
+    <span class="n">jittable</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># Enable JIT compilation</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">jittable=True</span></code>, all functions (<code class="docutils literal notranslate"><span class="pre">f</span></code>, <code class="docutils literal notranslate"><span class="pre">h</span></code>, <code class="docutils literal notranslate"><span class="pre">g</span></code>) must be compatible
+with JAX transformations. Avoid side effects and ensure all operations use
+<code class="docutils literal notranslate"><span class="pre">jax.numpy</span></code> instead of <code class="docutils literal notranslate"><span class="pre">numpy</span></code>.</p>
+</div>
+</section>
+<section id="custom-gradient">
+<h3>Custom Gradient<a class="headerlink" href="#custom-gradient" title="Permalink to this heading">#</a></h3>
+<p>If you have an efficient custom gradient implementation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">f1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">f1_grad</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span>
+
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">f1</span><span class="o">=</span><span class="n">f1</span><span class="p">,</span> <span class="n">f1_grad</span><span class="o">=</span><span class="n">f1_grad</span><span class="p">,</span> <span class="n">jittable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="callback-function">
+<h3>Callback Function<a class="headerlink" href="#callback-function" title="Permalink to this heading">#</a></h3>
+<p>Monitor optimization progress with a callback:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">my_callback</span><span class="p">(</span><span class="nb">iter</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_prev</span><span class="p">,</span> <span class="n">lbda</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">gamma_k</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Iteration </span><span class="si">{</span><span class="nb">iter</span><span class="si">}</span><span class="s2">: ||x|| = </span><span class="si">{</span><span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">f1</span><span class="o">=</span><span class="n">f1</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="p">[</span><span class="n">h</span><span class="p">],</span> <span class="n">callback</span><span class="o">=</span><span class="n">my_callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-inner-solver">
+<h3>Custom Inner Solver<a class="headerlink" href="#custom-inner-solver" title="Permalink to this heading">#</a></h3>
+<p>For advanced users, a custom inner solver can be provided:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pbalm.inner_solvers.inner_solvers</span><span class="w"> </span><span class="kn">import</span> <span class="n">PALMInnerTrainer</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">custom_train_fun</span><span class="p">(</span><span class="n">palm_obj_fun</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">max_iter</span><span class="p">,</span> <span class="n">tol</span><span class="p">):</span>
+    <span class="c1"># Your custom optimization logic</span>
+    <span class="c1"># Must return (x_optimal, state),</span>
+    <span class="c1"># where state is a dict with keys: &quot;obj_grad_evals&quot;, &quot;fp_res&quot;, &quot;obj_val&quot;, &quot;reg_val&quot;, &quot;status&quot;</span>
+    <span class="o">...</span>
+    <span class="k">return</span> <span class="n">x_new</span><span class="p">,</span> <span class="n">state</span>
+
+<span class="n">custom_runner</span> <span class="o">=</span> <span class="n">PALMInnerTrainer</span><span class="p">(</span><span class="n">custom_train_fun</span><span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span>
+    <span class="n">problem</span><span class="p">,</span>
+    <span class="n">x0</span><span class="p">,</span>
+    <span class="n">inner_solve_runner</span><span class="o">=</span><span class="n">custom_runner</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="structured-variables">
+<h3>Structured Variables<a class="headerlink" href="#structured-variables" title="Permalink to this heading">#</a></h3>
+<p>For problems with structured decision variables (e.g., matrices):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pbalm.utils.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">params_flatten</span><span class="p">,</span> <span class="n">params_shape</span>
+
+<span class="c1"># Define variables as a list</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">]</span>
+
+<span class="c1"># Get shape information</span>
+<span class="n">shapes</span><span class="p">,</span> <span class="n">cumsizes</span> <span class="o">=</span> <span class="n">params_shape</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+<span class="c1"># Flatten for the solver</span>
+<span class="n">x0</span> <span class="o">=</span> <span class="n">params_flatten</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+<span class="c1"># Solve with shape information</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">pbalm</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span>
+    <span class="n">problem</span><span class="p">,</span>
+    <span class="n">x0</span><span class="p">,</span>
+    <span class="n">x_shapes</span><span class="o">=</span><span class="n">shapes</span><span class="p">,</span>
+    <span class="n">x_cumsizes</span><span class="o">=</span><span class="n">cumsizes</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="tips-and-best-practices">
+<h2>Tips and Best Practices<a class="headerlink" href="#tips-and-best-practices" title="Permalink to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Start with ``use_proximal=True``</strong> for nonconvex problems</p></li>
+<li><p><strong>Enable ``jittable=True``</strong> when functions are JAX-compatible for faster execution</p></li>
+<li><p><strong>Use ``start_feas=True``</strong> (default) for highly constrained problems</p></li>
+<li><p><strong>Tune ``alpha``</strong> for better penalty parameter growth</p></li>
+<li><p><strong>Monitor convergence</strong> using the history attributes in <code class="docutils literal notranslate"><span class="pre">Result</span></code></p></li>
+<li><p><strong>Set ``verbosity=0``</strong> for production runs to disable output</p></li>
+</ol>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="quickstart.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Quick Start Guide</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="examples/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Examples</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-optimization-problems">Defining Optimization Problems</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-problem-class">The <code class="docutils literal notranslate"><span class="pre">Problem</span></code> Class</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#objective-function">Objective Function</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#constraints">Constraints</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regularization">Regularization</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#solving-problems">Solving Problems</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-solve-function">The <code class="docutils literal notranslate"><span class="pre">solve</span></code> Function</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-solver-parameters">Key Solver Parameters</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-results">Working with Results</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-result-class">The <code class="docutils literal notranslate"><span class="pre">Result</span></code> Class</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analyzing-convergence">Analyzing Convergence</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-features">Advanced Features</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#jit-compilation">JIT Compilation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-gradient">Custom Gradient</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#callback-function">Callback Function</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-inner-solver">Custom Inner Solver</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#structured-variables">Structured Variables</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tips-and-best-practices">Tips and Best Practices</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The P-BALM Developers; Adeyemi D. Adeoye et al.
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, The P-BALM Developers; Adeyemi D. Adeoye et al..
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
