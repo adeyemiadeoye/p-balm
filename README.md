@@ -107,7 +107,7 @@ See [LICENSE](LICENSE) for details.
 The authors acknowledge the funding received from the European Union (ERC Advanced Research Grant COMPACT, No. 101141351). Views and opinions expressed are however those of the authors only and do not necessarily reflect those of the European Union or the European Research Council. Neither the European Union nor the granting authority can be held responsible for them.
 
 <p align="center">
-    <img src="https://github.com/adeyemiadeoye/p-balm/blob/main/src/other_media/erc_logo.png" alt="ERC logo" width="400"/>
+    <img src="https://github.com/adeyemiadeoye/p-balm/blob/main/src/other_media/erc-logo.png" alt="ERC logo" width="400"/>
 </p>
 
 **pbalm** depends on the efficient implementation of [PANOC](https://ieeexplore.ieee.org/document/8263933) provided by [alpaqa](https://github.com/kul-optec/alpaqa), as well as its regularizers module.
