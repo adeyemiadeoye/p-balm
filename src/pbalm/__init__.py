@@ -1,6 +1,12 @@
 import sys
 
-from .pbalm import Problem, solve
+from .problem import Problem
+from .solution import solve
+
+import alpaqa as pa
+L1Norm = pa.functions.L1Norm
+Box = pa.Box
+NuclearNorm = pa.functions.NuclearNorm
 
 if sys.version_info[:2] >= (3, 8):
     # TODO: Import directly (no need for conditional) when `python_requires = >= 3.8`
