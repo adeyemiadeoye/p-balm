@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=46.1.0", "setuptools_scm[toml]>=5"]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=5"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
@@ -9,7 +9,7 @@ version_scheme = "no-guess-dev"
 name = "pbalm"
 version = "0.1.2"
 description = "Proximal augmented Lagrangian method for nonconvex optimization with equality and inequality constraints."
-readme = { file = "README.rst", content-type = "text/x-rst; charset=UTF-8" }
+readme = { file = "README.md", content-type = "text/markdown; charset=UTF-8" }
 authors = [
   { name = "The P-BALM Developers; Adeyemi D. Adeoye et al.", email = "adeyemi.adeoye@imtlucca.it" }
 ]
@@ -20,11 +20,12 @@ license = { file = "../LICENSE" }
 keywords = ["optimization", "nonlinear optimization", "constrained optimization", "augmented Lagrangian"]
 requires-python = ">=3.8"
 classifiers = [
-  "Intended Audience :: Science/Research",
-  "Operating System :: OS Independent",
-  "Topic :: Scientific/Engineering",
-  "License :: OSI Approved :: Apache Software License",
-  "Programming Language :: Python :: 3",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
 ]
 dependencies = [
   "numpy",
