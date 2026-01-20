@@ -1,7 +1,7 @@
 # pbalm
 
 <p align="center">
-    <img src="https://adeyemiadeoye.github.io/p-balm/tree/main/docs/source/_static/pbalm_logo.png" alt="pbalm logo"/>
+    <img src="https://github.com/adeyemiadeoye/p-balm/blob/main/docs/source/_static/pbalm_logo.png" alt="pbalm logo"/>
 </p>
 <p align="center">
     <a href="https://adeyemiadeoye.github.io/p-balm/"><img src="https://img.shields.io/badge/docs-Sphinx-blue" alt="Documentation"/></a>
