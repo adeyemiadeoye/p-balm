@@ -16,9 +16,7 @@ authors = [
   { name = "Alberto Bemporad", email = "alberto.bemporad@imtlucca.it" }
 ]
 maintainers = [
-  { name = "Adeyemi D. Adeoye", email = "adeyemi.adeoye@imtlucca.it" },
-  { name = "Puya Latafat", email = "puya.latafat@imtlucca.it" },
-  { name = "Alberto Bemporad", email = "alberto.bemporad@imtlucca.it" }
+  { name = "Adeyemi D. Adeoye, Puya Latafat, Alberto Bemporad", email = "adeyemi.adeoye@imtlucca.it, puya.latafat@imtlucca.it, alberto.bemporad@imtlucca.it" }
 ]
 license = { file = "../LICENSE" }
 keywords = ["optimization", "nonlinear optimization", "constrained optimization", "augmented Lagrangian"]
