@@ -1,18 +1,6 @@
 # pbalm
 
-<p align="center">
-    <img src="https://github.com/adeyemiadeoye/p-balm/blob/main/docs/source/_static/pbalm_logo.png" alt="pbalm logo"/>
-</p>
-<p align="center">
-    <a href="https://adeyemiadeoye.github.io/p-balm/"><img src="https://img.shields.io/badge/docs-Sphinx-blue" alt="Documentation"/></a>
-    <a href="https://arxiv.org/abs/2509.02894"><img src="https://img.shields.io/badge/paper-arXiv-red" alt="arXiv"/></a>
-    <a href="https://pypi.org/project/pbalm/"><img src="https://img.shields.io/pypi/v/pbalm" alt="PyPI"/></a>
-    <a href="https://github.com/adeyemiadeoye/p-balm/blob/main/LICENSE"><img src="https://img.shields.io/github/license/adeyemiadeoye/p-balm" alt="License"/></a>
-</p>
-
-A Python package providing a **proximal augmented Lagrangian method** for solving nonlinear programming problems with equality and inequality constraints.
-
-## Problem structure
+Python implementation of [PBALM](#citation).
 
 **pbalm** solves optimization problems of the form:
 
@@ -26,20 +14,16 @@ $$
 
 where $f_1$ is smooth (possibly nonconvex), $f_2$ is possibly nonsmooth but prox-friendly, and $g$, $h$ define smooth inequality and equality constraints, respectively.
 
-## Key Features
+Quick example:
 
-- **Nonconvex optimization**: handles nonconvex objectives and constraints
-- **Composite objectives**: supports smooth + nonsmooth terms
-- **Flexible constraints**: both equality and inequality constraints
-- **JAX-powered**: automatic differentiation and JIT compilation
-
-## Quick Example
+```bash
+python3 -m pip install pbalm
+```
 
 ```python
 import jax.numpy as jnp
 import pbalm
 
-# smooth part of the objective
 def f1(x):
     return jnp.sum(x**2)
 
@@ -67,27 +51,9 @@ result = pbalm.solve(problem, x0=x0, tol=1e-6)
 print(f"Solution: {result.x}")
 ```
 
-## Installation
+More examples in `/examples/` directory.
 
-```bash
-python3 -m pip install pbalm
-```
-
-For development:
-
-```bash
-git clone https://github.com/adeyemiadeoye/p-balm.git
-cd p-balm
-python3 -m pip install -e .
-```
-
-## Documentation
-
-Full documentation is available at **[adeyemiadeoye.github.io/p-balm](https://adeyemiadeoye.github.io/p-balm/)**.
-
-## Citation
-
-If you use **pbalm** in your research, please cite:
+## References
 
 ```bibtex
 @article{adeoye2025pbalm,
@@ -98,11 +64,7 @@ If you use **pbalm** in your research, please cite:
 }
 ```
 
-## License
-
-See [LICENSE](LICENSE) for details.
-
-## Acknowledgements
+## Acknowledgments
 
 This work was funded by the European Union (ERC Advanced Research Grant COMPACT, No. 101141351). Views and opinions expressed are however those of the authors only and do not necessarily reflect those of the European Union or the European Research Council. Neither the European Union nor the granting authority can be held responsible for them.
 
@@ -110,4 +72,4 @@ This work was funded by the European Union (ERC Advanced Research Grant COMPACT,
     <img src="https://github.com/adeyemiadeoye/p-balm/blob/main/src/other_media/erc-logo.png" alt="ERC logo" width="400"/>
 </p>
 
-**pbalm** depends on the efficient implementation of [PANOC](https://ieeexplore.ieee.org/document/8263933) provided by [alpaqa](https://github.com/kul-optec/alpaqa), as well as its regularizers module.
+Default inner solver: [PANOC](https://ieeexplore.ieee.org/abstract/document/8263933); also calls prox functions from: [alpaqa](https://github.com/kul-optec/alpaqa).

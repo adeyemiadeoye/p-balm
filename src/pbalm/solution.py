@@ -10,7 +10,7 @@ import time
 def solve(problem, x0, inner_solve_runner=None, lbda0=None, mu0=None, rho0=1e-3, nu0=1e-3, use_proximal=True,
             gamma0=1e-1, x_shapes=None, x_cumsizes=None, beta=0.5, alpha=10, delta=1.0, xi1=1.0, xi2=1.0, tol=1e-6, fp_tol=None, max_iter=1000, phase_I_tol=1e-7,
             start_feas=True, inner_solver=None, pa_direction=None, pa_solver_opts=None, verbosity=1, max_runtime=24.0,
-            phi_strategy="pow", feas_reset_interval=None, no_reset=False, adaptive_fp_tol=False, max_iter_inner=1000):
+            phi_strategy="pow", feas_reset_interval=None, no_reset=False, adaptive_fp_tol=False, max_iter_inner=1000, is_phase_I=False):
     """
     Calls the PBALM solver on the given problem instance.
 
@@ -82,7 +82,7 @@ def solve(problem, x0, inner_solve_runner=None, lbda0=None, mu0=None, rho0=1e-3,
                         xi1=xi1, xi2=xi2, tol=tol, fp_tol=fp_tol, max_iter=max_iter, phase_I_tol=phase_I_tol, start_feas=start_feas,
                         inner_solver=inner_solver, pa_direction=pa_direction, pa_solver_opts=pa_solver_opts, verbosity=verbosity,
                         max_runtime=max_runtime, phi_strategy=phi_strategy, feas_reset_interval=feas_reset_interval,
-                        no_reset=no_reset, adaptive_fp_tol=adaptive_fp_tol, max_iter_inner=max_iter_inner)
+                        no_reset=no_reset, adaptive_fp_tol=adaptive_fp_tol, max_iter_inner=max_iter_inner, is_phase_I=is_phase_I)
     solution.pbalm()
     res = Result(solution.x, solution.fp_res, solution.kkt_res, solution.total_infeas, solution.f_hist, solution.rho_hist, solution.nu_hist, solution.gamma_hist, solution.prox_hist, solution.solve_status, solution.total_runtime, solution.solve_runtime, grad_evals=getattr(solution, 'grad_evals', None))
     

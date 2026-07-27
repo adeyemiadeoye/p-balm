@@ -14,7 +14,7 @@ class Solution:
     """
     Holds the solution process and data for PBALM.
     """
-    def __init__(self, problem, x0, inner_solve_runner, lbda0, mu0, rho0, nu0, gamma0, x_shapes=None, x_cumsizes=None, use_proximal=False, beta=0.5, alpha=2.0, delta=1.0, xi1=1.0, xi2=1.0, tol=1e-6, fp_tol=None, max_iter=1000, phase_I_tol=1e-7, start_feas=True, inner_solver="PANOC", max_iter_inner=1000, pa_solver_opts=None, pa_direction=None, verbosity=1, max_runtime=24.0, phi_strategy="pow", feas_reset_interval=None, no_reset=False, adaptive_fp_tol=True):
+    def __init__(self, problem, x0, inner_solve_runner, lbda0, mu0, rho0, nu0, gamma0, x_shapes=None, x_cumsizes=None, use_proximal=False, beta=0.5, alpha=2.0, delta=1.0, xi1=1.0, xi2=1.0, tol=1e-6, fp_tol=None, max_iter=1000, phase_I_tol=1e-7, start_feas=True, inner_solver="PANOC", max_iter_inner=1000, pa_solver_opts=None, pa_direction=None, verbosity=1, max_runtime=24.0, phi_strategy="pow", feas_reset_interval=None, no_reset=False, adaptive_fp_tol=True, is_phase_I=False):
         self.problem = problem
         self.x0 = x0
         self.x_shapes = x_shapes
@@ -87,6 +87,8 @@ class Solution:
         if self.problem.g is not None:
             self.cons_present += 1
         self.num_eps = self.tol*self.cons_present
+
+        self.is_phase_I = is_phase_I
 
 
     def _get_phi_i(self, i):
@@ -243,7 +245,7 @@ class Solution:
                     num_eps = self.num_eps
                 if self.verbosity > 0:
                     print(
-                        f"{i:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {abs(max(self.total_infeas[-1]-num_eps, self.total_infeas[-1])):<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
+                        f"{i:<5} | {f_x:<10.4e} | {'-':^10} | {abs(max(self.total_infeas[-1]-num_eps, 0.0)):<10.4e} | {f"{jnp.max(rho_vec):<10.4e}" if rho_vec is not None else f"{'-':^10}"} | {f"{jnp.max(nu_vec):<10.4e}" if nu_vec is not None else f"{'-':^10}"} | {f"{self.gamma_k:<10.4e}" if self.use_proximal else f"{'-':^10}"}")
 
                 # Step 1: to reset xhat?
                 L_aug_val = L_aug(x)
@@ -293,17 +295,18 @@ class Solution:
             isnangamma = False if self.use_proximal is False else (jnp.isnan(self.gamma_k) or jnp.isinf(self.gamma_k))
             if jnp.isnan(self.problem.f1(x_new)) or jnp.isinf(self.problem.f1(x_new)) or isnanfpres or isnannu or isnanrho or isnangamma:
                 if self.verbosity > 0:
+                    stop_eps = abs(max(self.total_infeas[-1]-self.num_eps, 0.0))
                     print(
-                    f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {abs(max(self.total_infeas[-1]-self.num_eps, self.total_infeas[-1])):<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
+                    f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {stop_eps:<10.4e} | {f"{jnp.max(rho_vec):<10.4e}" if rho_vec is not None else f"{'-':^10}"} | {f"{jnp.max(nu_vec):<10.4e}" if nu_vec is not None else f"{'-':^10}"} | {f"{self.gamma_k:<10.4e}" if self.use_proximal else f"{'-':^10}"}")
                     print("-" * 90)
                     print("One or more functions returned NaN or Inf. Stopping optimization.")
-                    print(f"{'Objective value:':<25} {f_x:.6e}")
-                    print(f"{'prox_term_i:':<25} {prox_term_i:.6e}")
+                    print(f"{'f1 value:':<25} {f_x:.6e}")
+                    print(f"{'prox_term_i:':<25} {f"{prox_term_i:.6e}" if self.use_proximal else f"{'-':.6}"}")
                     print(f"{'eps-KKT residual:':<25} {eps_kkt_res:.6e}")
-                    print(f"{'total infeas:':<25} {abs(max(self.total_infeas[-1]-self.num_eps, self.total_infeas[-1])):.6e}")
-                    print(f"{'rho:':<25} {jnp.max(rho_vec) if rho_vec is not None else 0:.6e}")
-                    print(f"{'nu:':<25} {jnp.max(nu_vec) if nu_vec is not None else 0:.6e}")
-                    print(f"{'gamma:':<25} {self.gamma_k:.6e}")
+                    print(f"{'total infeas:':<25} {stop_eps:.6e}")
+                    print(f"{'rho:':<25} {f"{jnp.max(rho_vec):.6e}" if rho_vec is not None else f"{'-':.6}"}")
+                    print(f"{'nu:':<25} {f"{jnp.max(nu_vec):.6e}" if nu_vec is not None else f"{'-':.6}"}")
+                    print(f"{'gamma:':<25} {f"{self.gamma_k:.6e}" if self.use_proximal else f"{'-':.6}"}")
                 self.solve_status = "NaNOrInf"
                 if self.problem.callback is not None:
                     self.problem.callback(
@@ -366,23 +369,24 @@ class Solution:
             if self.use_proximal:
                 self.gamma_k = jnp.maximum(jnp.sum(self.delta*(self.x0 - x)**2), self.gamma0*phi_i)
 
+            stop_eps = abs(max(self.total_infeas[-1]-self.num_eps, 0.0))
             if self.verbosity > 0 and ((i + 1) % int(20/self.verbosity) == 0 or (i + 1) == self.max_iter):
                 print(
-                    f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {abs(max(self.total_infeas[-1]-self.num_eps, self.total_infeas[-1])):<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
+                    f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {stop_eps:<10.4e} | {f"{jnp.max(rho_vec):<10.4e}" if rho_vec is not None else f"{'-':^10}"} | {f"{jnp.max(nu_vec):<10.4e}" if nu_vec is not None else f"{'-':^10}"} | {f"{self.gamma_k:<10.4e}" if self.use_proximal else f"{'-':^10}"}")
 
-            if (eps_kkt_res <= self.tol):
+            if ((stop_eps if self.is_phase_I else eps_kkt_res) <= self.tol):
                 if self.verbosity > 0:
                     print(
-                        f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {abs(max(self.total_infeas[-1]-self.num_eps, self.total_infeas[-1])):<10.4e} | {jnp.max(rho_vec) if rho_vec is not None else 0:<10.4e} | {jnp.max(nu_vec) if nu_vec is not None else 0:<10.4e} | {self.gamma_k:<10.4e}")
+                        f"{i + 1:<5} | {f_x:<10.4e} | {prox_term_i:<10.4e} | {stop_eps:<10.4e} | {f"{jnp.max(rho_vec):<10.4e}" if rho_vec is not None else f"{'-':^10}"} | {f"{jnp.max(nu_vec):<10.4e}" if nu_vec is not None else f"{'-':^10}"} | {f"{self.gamma_k:<10.4e}" if self.use_proximal else f"{'-':^10}"}")
                     print("-" * 90)
                     print(f"Convergence achieved after {i + 1} iterations and {(time.time() - solve_start_time):.2f} seconds.")
-                    print(f"{'Optimal f value found:':<25} {f_x:.6e}")
+                    print(f"{'Optimal f1 value found:':<25} {f_x:.6e}")
+                    print(f"{'prox_term_i:':<25} {f"{prox_term_i:.6e}" if self.use_proximal else f"{'-':.6}"}")
                     print(f"{'eps-KKT residual:':<25} {eps_kkt_res:.6e}")
-                    print(f"{'total infeas:':<25} {abs(max(self.total_infeas[-1]-self.num_eps, self.total_infeas[-1])):.6e}")
-                    print(f"{'rho:':<25} {jnp.max(rho_vec) if rho_vec is not None else 0:.6e}")
-                    print(f"{'nu:':<25} {jnp.max(nu_vec) if nu_vec is not None else 0:.6e}")
-                    print(f"{'gamma:':<25} {self.gamma_k:.6e}")
-                    print(f"{'prox_term_i:':<25} {prox_term_i:.6e}")
+                    print(f"{'total infeas:':<25} {stop_eps:.6e}")
+                    print(f"{'rho:':<25} {f"{jnp.max(rho_vec):.6e}" if rho_vec is not None else f"{'-':.6}"}")
+                    print(f"{'nu:':<25} {f"{jnp.max(nu_vec):.6e}" if nu_vec is not None else f"{'-':.6}"}")
+                    print(f"{'gamma:':<25} {f"{self.gamma_k:.6e}" if self.use_proximal else f"{'-':.6}"}")
                     self.solve_status = "Converged"
                 if self.problem.callback is not None:
                     self.problem.callback(
@@ -401,13 +405,13 @@ class Solution:
                 if self.verbosity > 0:
                     print("-" * 90)
                     print("Maximum iterations reached without convergence.")
-                    print(f"{'Objective value:':<25} {f_x:.6e}")
-                    print(f"{'prox_term_i:':<25} {prox_term_i:.6e}")
+                    print(f"{'f1 value:':<25} {f_x:.6e}")
+                    print(f"{'prox_term_i:':<25} {f"{prox_term_i:.6e}" if self.use_proximal else f"{'-':.6}"}")
                     print(f"{'eps-KKT residual:':<25} {eps_kkt_res:.6e}")
-                    print(f"{'total infeas:':<25} {abs(max(self.total_infeas[-1]-self.num_eps, self.total_infeas[-1])):.6e}")
-                    print(f"{'rho:':<25} {jnp.max(rho_vec) if rho_vec is not None else 0:.6e}")
-                    print(f"{'nu:':<25} {jnp.max(nu_vec) if nu_vec is not None else 0:.6e}")
-                    print(f"{'gamma:':<25} {self.gamma_k:.6e}")
+                    print(f"{'total infeas:':<25} {stop_eps:.6e}")
+                    print(f"{'rho:':<25} {f"{jnp.max(rho_vec):.6e}" if rho_vec is not None else f"{'-':.6}"}")
+                    print(f"{'nu:':<25} {f"{jnp.max(nu_vec):.6e}" if nu_vec is not None else f"{'-':.6}"}")
+                    print(f"{'gamma:':<25} {f"{self.gamma_k:.6e}" if self.use_proximal else f"{'-':.6}"}")
                 self.solve_status = "Stopped"
                 if self.problem.callback is not None:
                     self.problem.callback(

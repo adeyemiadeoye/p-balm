@@ -112,13 +112,10 @@ def phase_I_optim(x0, h, g, f2, lbda0, mu0, alpha=20, gamma0=1e-8, tol=1e-7, max
         feas_f = lambda z: 0.5*jnp.sum(h(z)**2)
         feas_g = None
 
-    f2_0 = None
-
     feas_prob = pbalm.Problem(
                     f1=feas_f,
                     g=[feas_g] if feas_g is not None else None,
                     h=None,
-                    f2=f2_0,
                     jittable=True
                 )
     if g:
@@ -127,13 +124,11 @@ def phase_I_optim(x0, h, g, f2, lbda0, mu0, alpha=20, gamma0=1e-8, tol=1e-7, max
         z0 = x0.copy()
     feas_res = pbalm.solve(feas_prob, z0, lbda0=lbda0, mu0=mu0, use_proximal=True, tol=tol, max_iter=max_iter,
                             max_iter_inner=10000, alpha=alpha, gamma0=gamma0,
-                            start_feas=False, inner_solver=inner_solver, verbosity=0, max_runtime=0.8333)
+                            start_feas=False, inner_solver=inner_solver, verbosity=0, max_runtime=0.8333, is_phase_I=True)
     if h is not None and g is None:
         total_infeas = jnp.sum((h(feas_res.x[:x_dim]))**2)-tol
     else:
-        total_infeas = feas_res.total_infeas[-1]
-        if h is not None:
-            total_infeas += jnp.sum((h(feas_res.x[:x_dim]))**2)-tol
+        total_infeas = abs(max(feas_res.total_infeas[-1]-tol, 0.0))
     if total_infeas <= max(tol, 1e-5):
         print("Phase I optimization successful.")
     else:

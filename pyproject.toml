@@ -7,20 +7,23 @@ version_scheme = "no-guess-dev"
 
 [project]
 name = "pbalm"
-version = "0.1.2"
-description = "Proximal augmented Lagrangian method for nonconvex optimization with equality and inequality constraints."
+version = "0.1.3"
+description = "Software package accompanying PBALM paper (with examples)."
 readme = { file = "README.md", content-type = "text/markdown; charset=UTF-8" }
 authors = [
-  { name = "The P-BALM Developers; Adeyemi D. Adeoye et al.", email = "adeyemi.adeoye@imtlucca.it" }
+  { name = "Adeyemi D. Adeoye", email = "adeyemi.adeoye@imtlucca.it" },
+  { name = "Puya Latafat", email = "puya.latafat@imtlucca.it" },
+  { name = "Alberto Bemporad", email = "alberto.bemporad@imtlucca.it" }
 ]
 maintainers = [
-  { name = "The P-BALM Developers; Adeyemi D. Adeoye et al.", email = "adeyemi.adeoye@imtlucca.it" }
+  { name = "Adeyemi D. Adeoye", email = "adeyemi.adeoye@imtlucca.it" },
+  { name = "Puya Latafat", email = "puya.latafat@imtlucca.it" },
+  { name = "Alberto Bemporad", email = "alberto.bemporad@imtlucca.it" }
 ]
 license = { file = "../LICENSE" }
 keywords = ["optimization", "nonlinear optimization", "constrained optimization", "augmented Lagrangian"]
 requires-python = ">=3.8"
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering",
@@ -48,7 +51,7 @@ docs = [
 ]
 
 [project.urls]
-"Documentation" = "https://adeyemiadeoye.github.io/p-balm/"
+"Documentation" = "https://github.com/adeyemiadeoye/p-balm"
 "Source" = "https://github.com/adeyemiadeoye/p-balm"
 "Issue Tracker" = "https://github.com/adeyemiadeoye/p-balm/issues"
 
